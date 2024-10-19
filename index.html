@@ -1,0 +1,33 @@
+<html>
+<head>
+	<title>АС "Свёклопункт"</title>
+	<link rel = 'shortcut icon' href = 'favicon.png'>
+	<link rel = 'stylesheet' href = 'theme.css'>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src = './jquery-3.7.1.min.js'></script>
+	<style>
+		body {
+			background-size: auto;
+			background: url("background.jpeg") no-repeat;
+		}
+	</style>
+</head>
+<body>
+	<div class = 'modal_wrap'>
+		<div class = 'modal_window'>
+			<img src = 'favicon.png' id = 'picture_form_auth'>
+			<h1>АС "Свёклопункт"</h1>
+			<p>Автоматизированная система призаводского свёклопункта</p>
+			<form id = 'auth_form'>
+				<input name = 'user_login' type = 'text' class = 'input_base' placeholder = 'Логин' autocomplete = "off">
+				<input name = 'user_password' type = 'password' class = 'input_base' placeholder = 'Пароль'>
+				<button class = 'button_base' type = 'submit'>Войти</button>
+			</form>
+			<div class = "error_base">Логин или пароль неверный</div>
+		</div>
+		<div id = 'auth_form_freepik'>Designed by Sasha Ts. (Photo: zainsk.tatar.ru)</div>
+	</div>
+	<script src = './app.js'></script>
+</body>
+</html>

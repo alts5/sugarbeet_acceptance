@@ -1,0 +1,143 @@
+html, body {
+	margin: 0;
+	padding: 0;
+}
+
+div, span, a, p, input {
+	color: #4c4c4c;
+	font-family: 'Segoe UI', Arial;
+	font-size: 20px;
+	font-weight: 100;
+}
+
+input, textarea, button {
+	font-family: 'Segoe UI', Arial;
+	border-radius: 15px;
+	padding: 20px;
+	font-size: 20px;
+	color: #4c4c4c;
+	font-family: 'Segoe UI', Arial;
+	border: 1px solid #ed1e36;
+}
+
+input, textarea, button :focus { 
+	outline:none; 
+}
+
+input, button :hover {
+	 background: rgba(255, 255, 255, .4);
+}
+
+.button_base:active {
+	 background: rgba(255, 255, 255, .7);
+	 color: grey;
+}
+
+h1 {
+	text-align: center;
+	font-family: 'Segoe UI', Arial;
+	padding: 3px 0;
+}
+
+.modal_wrap {
+	position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+	background: rgb(0,0,0,.5);
+}
+
+.modal_window {
+	position: fixed;
+	margin: auto auto;
+	left: 0;
+	right: 0;	
+	top: 0;
+	bottom: 0;
+	width: 400px;
+	height: 580px;
+    background: rgb(255,255,255, .95);
+	padding: 30px;
+	border-radius: 15px;
+	text-align: center;
+	opacity: 0;
+	animation: ani 2.5s forwards;
+	border: 1px solid rgba(255, 255, 255, .5);
+}
+
+
+.input_base {
+	width: 100%;
+	margin: 10px 0 10px 0;
+	border: 1px solid #b3b3b3;
+	background: none;
+	outline: none;
+}
+
+.button_base {
+	width: 100%;
+	margin: 10px 0 10px 0;
+	border: 1px solid #b3b3b3;
+	background: green;
+	color: white;
+}
+
+
+#picture_form_auth {
+	width: 120px;
+}
+
+a {
+	color: #4c4c4c;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #4c4c4c;
+	text-decoration: underline;
+}
+
+a:visited {
+	color: #4c4c4c;
+}
+
+#auth_form_freepik {
+	bottom: 0;
+	right: 0;
+	position: absolute;
+	color: white;
+	font-size: 16px;
+	padding: 20px;
+}
+
+@keyframes ani {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+
+.error_base {
+	display: none;
+	color: ff5656;
+	width: 100%;
+}
+
+/*--Стили личного кабинета-----*/
+header {
+	background-color: 3b3b3b;
+	color: white;
+	position: sticky;
+	height: 50px;
+}
+
+#picture_header {
+	width: 60px;
+	position: fixed;
+	left: 20px;
+	top: 8px;
+}
+
+.span_header {
+	color: white;
+}
