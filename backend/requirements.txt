@@ -1,0 +1,6 @@
+uvicorn
+fastapi
+pyjwt
+passlib
+python-multipart
+mysql-connector-python

@@ -1,0 +1,6 @@
+backend/.idea
+backend/venv/Lib/site-packages/anyio/_backends/__pycache__/_asyncio.cpython-312.pyc
+/nginx-1.27.2
+/.idea
+/backend/venv
+/backend/__pycache__
