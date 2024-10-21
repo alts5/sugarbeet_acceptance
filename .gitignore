@@ -4,3 +4,5 @@ backend/venv/Lib/site-packages/anyio/_backends/__pycache__/_asyncio.cpython-312.
 /.idea
 /backend/venv
 /backend/__pycache__
+background.jpeg
+favicon.png
