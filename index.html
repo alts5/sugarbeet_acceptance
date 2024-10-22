@@ -5,8 +5,8 @@
 	<link rel = 'stylesheet' href = 'theme.css'>
 	<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<script src = './jquery-3.7.1.min.js'></script>
-	<script src = 'fingerprint.min.js'></script>
+	<script src = 'jquery-3.7.1.min.js'></script>
+	<script src = 'service.js'></script>
 	<style>
 		body {
 			background-size: auto;
@@ -14,7 +14,7 @@
 		}
 	</style>
 </head>
-<body>
+<body onload = "if (getUser()) window.location.href = '/workroom.html'">
 	<div class = 'modal_wrap'>
 		<div class = 'modal_window'>
 			<img src = 'favicon.png' id = 'picture_form_auth'>
@@ -29,6 +29,6 @@
 		</div>
 		<div id = 'auth_form_freepik'>Designed by Sasha Ts. (Photo: zainsk.tatar.ru)</div>
 	</div>
-	<script src = './app.js'></script>
+	<script src = 'app.js'></script>
 </body>
 </html>
