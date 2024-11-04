@@ -1,6 +1,7 @@
 html, body {
 	margin: 0;
 	padding: 0;
+	color: #3b3b3b;
 }
 
 div, span, a, p, input {
@@ -125,10 +126,9 @@ a:visited {
 }
 
 /*--Стили личного кабинета-----*/
-header {
+.header {
 	background-color: #3b3b3b;
 	color: white;
-	position: sticky;
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
@@ -136,9 +136,12 @@ header {
 	align-items: center;
 	gap: 20px;
 	padding: 10px;
+	position: fixed;
+	width: 100%;
+	top: 0;
 }
 
-header * {
+.header * {
 	color: white;
 	font-size: 18px;
 }
@@ -154,4 +157,67 @@ header * {
 .username_header {
 	text-align: right;
 	font-size: 16px;
+}
+
+.exit_header {
+	padding: 0 20px 0 5px;
+}
+
+.body {
+	margin: 80px 0 0 0;
+}
+
+.flex_div {
+	display: flex;
+	justify-content: center;
+	padding: 10px;
+	gap: 40px;
+	flex-wrap: wrap;
+
+}
+
+.flex_div button {
+	padding: 20px 30px ;
+	font-size: 18px;
+	color: white;
+	border: none;
+	border-radius: 10px;
+}
+
+.flex_div button:nth-child(4n+3) {
+	background: #00bf00;
+}
+
+.flex_div button:nth-child(4n+1) {
+	background: #ea3131;
+}
+
+.flex_div button:nth-child(4n+4) {
+	background: #1E90FF;
+}
+
+.flex_div button:nth-child(4n+2) {
+	background: #ffaa00;
+}
+
+.body table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 10px 0;
+	font-size: 18px;
+	font-weight: 100;
+}
+
+.body table th {
+	border-bottom: 1px solid grey;
+	padding: 10px;
+}
+
+.body table td {
+	padding: 20px;
+	text-align: center;
+}
+
+.body table tr:nth-child(2n) {
+	background: #eee;
 }
