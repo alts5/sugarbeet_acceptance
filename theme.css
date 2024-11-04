@@ -4,13 +4,13 @@ html, body {
 	color: #3b3b3b;
 }
 
-div, span, a, p, input {
+div, span, a, p, .auth input {
 	font-family: 'Segoe UI', Arial;
 	font-size: 20px;
 	font-weight: 100;
 }
 
-input, textarea, button {
+textarea, button, .auth input {
 	font-family: 'Segoe UI', Arial;
 	border-radius: 15px;
 	padding: 20px;
@@ -20,7 +20,7 @@ input, textarea, button {
 	border: 1px solid #ed1e36;
 }
 
-input, textarea, button :focus { 
+input, textarea, button, select:focus { 
 	outline:none; 
 }
 
@@ -40,17 +40,17 @@ h1 {
 	font-weight: 500;
 }
 
-.modal_wrap {
+.modal_wrap, .modal_wrap_lk {
 	position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 100;
+    z-index: 0;
 	background: rgb(0,0,0,.5);
 }
 
-.modal_window {
+.modal_window, .modal_window_lk {
 	position: fixed;
 	margin: auto auto;
 	left: 0;
@@ -65,7 +65,7 @@ h1 {
 	text-align: center;
 	opacity: 0;
 	animation: ani 2.5s forwards;
-	border: 1px solid rgba(255, 255, 255, .5);
+	border: 1px solid rgba(255, 255, 255, .5, .5);
 }
 
 
@@ -196,14 +196,18 @@ a:visited {
 	margin: 10px 0;
 }
 
-.flex_div button {
-	padding: 10px 25px;
-	font-size: 14px;
+.flex_div button, .modal_button {
+	padding: 15px 30px;
+	font-size: 16px;
 	color: white;
 	border: none;
 	border-radius: 5px;
 	cursor: pointer;
 	width: 20%;
+}
+
+.modal_button {
+	width: 100%;
 }
 
 .flex_div button:nth-child(4n+3) {
@@ -266,12 +270,24 @@ a:visited {
 	background: #1E90FF;
 }
 
-.info_block[data-color=red] {
+.info_block[data-color=red], .modal_button[data-type=cancel] {
 	background: #ea3131;
 }
 
-.info_block[data-color=green] {
+.info_block[data-color=green], .modal_button[data-type=confirm] {
 	background: #00bf00;
+}
+
+.modal_button[data-type=cancel]:active {
+	background: none;
+	color: #ea3131;
+	border: 1px solid #ea3131;
+}
+
+.modal_button[data-type=confirm]:active {
+	background: none;
+	color: #00bf00;
+	border: 1px solid #00bf00;
 }
 
 .info_block[data-color=yellow] {
@@ -315,6 +331,37 @@ a:visited {
 
 .body_header {
 	border-bottom: 1px solid #b3b3b3;
+}
+
+.modal_window_lk h3 {
+	padding: 0 0 15px;
+	border-bottom: 1px solid #b3b3b3;
+}
+
+.modal_wrap_lk, .modal_window_lk {
+	display: none;
+}
+.modal_window_lk input, select {
+	font-size: 16px;
+	width: 100%;
+	padding: 10px;
+	border: none;
+	border-bottom: 1px solid grey;
+	margin: 20px 0;
+	background: none;
+	text-align-last: center;
+}
+
+
+.modal_window_lk .modal_buttons_panel {
+	display: flex;
+	flex-direction: row;
+	justify-content: right;
+	gap: 20px;
+}
+
+.hidden_form_field {
+	display: none;
 }
 
 ::-webkit-scrollbar { width: 6px; height: 10px;}

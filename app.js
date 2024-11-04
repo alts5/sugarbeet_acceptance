@@ -46,6 +46,16 @@ function errorInformController(action, error = "") {
     }
 }
 
+function modal_window_controller(elem, action) {
+	if (action == 1) {
+		$('.modal_wrap_lk').css("display", "block");
+		$('#' + elem).css("display", "block");
+	}
+	else {
+		$('.modal_wrap_lk').css("display", "none");
+		$('#' + elem).css("display", "none");
+	}
+}
 
 $(document).ready(function() {
 	var hrefs = {
@@ -64,3 +74,4 @@ $(document).ready(function() {
 		}
 	}
 });
+
