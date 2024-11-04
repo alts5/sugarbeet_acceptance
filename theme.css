@@ -5,7 +5,6 @@ html, body {
 }
 
 div, span, a, p, input {
-	color: #4c4c4c;
 	font-family: 'Segoe UI', Arial;
 	font-size: 20px;
 	font-weight: 100;
@@ -247,6 +246,38 @@ a:visited {
 	border: 1px solid #ffaa00;
 }
 
+.info_block {
+	padding: 40px;
+	border-radius: 5px;
+	text-align: center;
+	color: white !important;
+}
+
+.info_block div:nth-child(1) {
+	font-weight: 600;
+	font-size: 25px;
+}
+.info_block div:nth-child(2) {
+	font-size: 80px;
+	padding: 10px;
+}
+
+.info_block[data-color=blue] {
+	background: #1E90FF;
+}
+
+.info_block[data-color=red] {
+	background: #ea3131;
+}
+
+.info_block[data-color=green] {
+	background: #00bf00;
+}
+
+.info_block[data-color=yellow] {
+	background: #ffaa00;
+}
+
 .body table {
 	width: 100%;
 	border-collapse: collapse;
@@ -286,17 +317,3 @@ a:visited {
 ::-webkit-scrollbar-track-piece { background-color: #eee}
 ::-webkit-scrollbar-thumb { height: 10px; background-color: #3b3b3b; }
 
-
-
-/*------Стилизация footer-----*/
-
-.footer {
-	position: relative;
-	bottom: 0;
-	width: 100%;
-	background: #3b3b3b;
-	padding: 30px 0;
-	color: white;
-	font-size: 16px;
-	text-align: center;
-}
