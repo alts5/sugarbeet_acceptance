@@ -58,6 +58,7 @@ function modal_window_controller(elem, action) {
 }
 
 $(document).ready(function() {
+	$('.dateMask').mask('99.99.9999');
 	var hrefs = {
 		"Дашборд" : "../workroom", 
 		"Транспортные единицы" : "../te", 

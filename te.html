@@ -6,7 +6,8 @@
 	<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<script src = './jquery-3.7.1.min.js'></script>
-	<script src = 'service.js'></script>
+	<script src = './service.js'></script>
+	<script src = './jquery.maskedinput.min.js'></script>
 </head>
 <body onload = "if (!getUser()) { sessionStorage.clear(); window.location.href = '/'; }">
 	<div class = "header">
@@ -25,8 +26,8 @@
 			<p>В данном разделе Вы можете осуществлять регистрацию, приёмку и отбраковку транспортных единиц</p>
 		</div>	
 		<div class = "flex_div">
-			<button>Добавить транспортную единицу</button>
-			<button>Установить фильтр отображения ТЕ</button>
+			<button onclick = "modal_window_controller('regForm', 1)">Регистрация транспортную единицу</button>
+			<button onclick = "modal_window_controller('filterForm', 1)">Установить фильтр отображения ТЕ</button>
 		</div>
 		<table>
 			<tr>
@@ -58,13 +59,13 @@
 	<div class = 'modal_window_lk' style = "height: 280px" id = "rejectForm">
 		<h3>Отбраковка транспортной единицы</h3>
 		<form>
-		<div>Укажите причину отбраковки ТЕ</div>
-		<input name = "reject_comment" placeholder = "Например, Сырье принимаемой ТЕ не подлежит приемке">
-		<div class = "modal_buttons_panel">
-			<button class = "modal_button" data-type = "confirm">Подтвердить</button>
-			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('rejectForm', 0)">Отменить</button>
-		</div>
-		<input name = "id_te" class = "hidden_form_field">
+			<div>Укажите причину отбраковки ТЕ</div>
+			<input name = "reject_comment" placeholder = "Например, Сырье принимаемой ТЕ не подлежит приемке">
+			<div class = "modal_buttons_panel">
+				<button class = "modal_button" data-type = "confirm">Подтвердить</button>
+				<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('rejectForm', 0)">Отменить</button>
+			</div>
+			<input name = "id_te" class = "hidden_form_field">
 		</form>
 	</div>
 
@@ -73,13 +74,13 @@
 	<div class = 'modal_window_lk' style = "height: 250px" id = "acceptForm">
 		<h3>Приёмка транспортной единицы</h3>
 		<form>
-		<div>Укажите комментарий к принимаемой ТЕ</div>
-		<input name = "accept_comment" placeholder = "Например, Замечаний к принятому ТС нет">
-		<div class = "modal_buttons_panel">
-			<button class = "modal_button" data-type = "confirm">Подтвердить</button>
-			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('acceptForm', 0)">Отменить</button>
-		</div>
-		<input name = "id_te" class = "hidden_form_field">
+			<div>Укажите комментарий к принимаемой ТЕ</div>
+			<input name = "accept_comment" placeholder = "Например, Замечаний к принятому ТС нет">
+			<div class = "modal_buttons_panel">
+				<button class = "modal_button" data-type = "confirm">Подтвердить</button>
+				<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('acceptForm', 0)">Отменить</button>
+			</div>
+			<input name = "id_te" class = "hidden_form_field">
 		</form>
 	</div>
 	
@@ -87,17 +88,59 @@
 	<div class = 'modal_window_lk' style = "height: 290px" id = "distrForm">
 		<h3>Распределение транспортной единицы</h3>
 		<form>
-		<div>Распределить ТЕ на </div>
-		<select name = "distr_place" placeholder = "Выберите место распределения">
-			<option>Анализ показателей, вызвавших сомнение, в сырьевой лаборатории</option>
-			<option>Взвешивание</option>
-			<option>Взвешивание и последующий лабораторный контроль</option>
-		</select>
-		<div class = "modal_buttons_panel">
-			<button class = "modal_button" data-type = "confirm">Подтвердить</button>
-			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('distrForm', 0)">Отменить</button>
-		</div>
-		<input name = "id_te" class = "hidden_form_field">
+			<div>Распределить ТЕ на </div>
+			<select name = "distr_place" placeholder = "Выберите место распределения">
+				<option>Анализ показателей, вызвавших сомнение, в сырьевой лаборатории</option>
+				<option>Взвешивание</option>
+				<option>Взвешивание и последующий лабораторный контроль</option>
+			</select>
+			<div class = "modal_buttons_panel">
+				<button class = "modal_button" data-type = "confirm">Подтвердить</button>
+				<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('distrForm', 0)">Отменить</button>
+			</div>
+			<input name = "id_te" class = "hidden_form_field">
+		</form>
+	</div>
+	
+	<!--Окно добавления ТЕ-->
+	<div class = 'modal_window_lk' id = "regForm" style = "height: 600px">
+		<h3>Регистрация транспортной единицы</h3>
+		<form>
+			<div>Наименование агрофирмы</div>
+			<input name = "vendor" placeholder = 'Например, Агрофирма "Сарманово"'>
+			<div>Государственный регистрационный знак ТЕ</div>
+			<input name = "regnum" placeholder = 'Например, А015АА116'>
+			<div>Описание характеристик свёклы</div>
+			<input name = "characts" placeholder = 'Например, Без гнили, без ботвы'>
+			<div>Комментарий</div>
+			<input name = "note" placeholder = 'Например, Прибыла без накладной'>
+			<div class = "modal_buttons_panel">
+				<button class = "modal_button" data-type = "confirm">Подтвердить</button>
+				<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('regForm', 0)">Отменить</button>
+			</div>
+			<input name = "id_te" class = "hidden_form_field">
+		</form>
+	</div>
+	
+	<!--Окно филтра списка ТЕ-->
+	<div class = 'modal_window_lk' id = "filterForm" style = "height: 360px">
+		<h3>Настройка фильтра отображения</h3>
+		<form>
+			<div>Дата, за которую отображается список</div>
+			<input name = "vendor" placeholder = 'Например, 01.01.1970' class = "dateMask">
+			<div>Статус транспортных единиц</div>
+			<select name = "distr_place" placeholder = "Выберите статус">
+				<option>Принята</option>
+				<option>Отбракована</option>
+				<option>Прибыла в свёклопункт</option>
+				<option>Распределена</option>
+				<option>Ожидает подтверждения</option>
+			</select>
+			<div class = "modal_buttons_panel">
+				<button class = "modal_button" data-type = "confirm">Подтвердить</button>
+				<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('filterForm', 0)">Отменить</button>
+			</div>
+			<input name = "id_te" class = "hidden_form_field">
 		</form>
 	</div>
 	
