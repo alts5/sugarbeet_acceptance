@@ -282,8 +282,13 @@ a:visited {
 	width: 100%;
 	border-collapse: collapse;
 	margin: 10px 0;
-	font-size: 18px;
+	font-size: 16px;
 	font-weight: 100;
+}
+
+.body table img {
+	width: 30px;
+	cursor: pointer;
 }
 
 .body table th {
