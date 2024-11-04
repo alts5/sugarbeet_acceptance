@@ -94,6 +94,7 @@ h1 {
 a {
 	color: #4c4c4c;
 	text-decoration: none;
+	cursor: pointer;
 }
 
 a:hover {
@@ -164,7 +165,18 @@ a:visited {
 }
 
 .body {
-	margin: 80px 0 0 0;
+	padding: 80px 50px 0;
+}
+
+.nav {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	gap: 30px;
+}
+
+.nav a {
+	font-weight: 600;
 }
 
 .flex_div {
@@ -173,15 +185,17 @@ a:visited {
 	padding: 10px;
 	gap: 40px;
 	flex-wrap: wrap;
-
+	margin: 10px 0;
 }
 
 .flex_div button {
-	padding: 20px 30px ;
-	font-size: 18px;
+	padding: 10px 25px;
+	font-size: 14px;
 	color: white;
 	border: none;
-	border-radius: 10px;
+	border-radius: 5px;
+	cursor: pointer;
+	width: 20%;
 }
 
 .flex_div button:nth-child(4n+3) {
@@ -221,3 +235,17 @@ a:visited {
 .body table tr:nth-child(2n) {
 	background: #eee;
 }
+
+.body h2 {
+	margin: 10px 0;
+}
+
+.body_header {
+	border-bottom: 1px solid #b3b3b3;
+}
+
+::-webkit-scrollbar { width: 6px; height: 10px;}
+::-webkit-scrollbar-track {  background-color: #3b3b3b;}
+::-webkit-scrollbar-track-piece { background-color: #eee}
+::-webkit-scrollbar-thumb { height: 10px; background-color: #3b3b3b; }
+
