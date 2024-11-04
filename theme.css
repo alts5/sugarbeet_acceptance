@@ -181,6 +181,13 @@ a:visited {
 	font-size: 18px;
 }
 
+
+.nav a:active {
+	font-weight: 200;
+	font-size: 18px;
+}
+
+
 .flex_div {
 	display: flex;
 	justify-content: center;

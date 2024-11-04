@@ -48,5 +48,19 @@ function errorInformController(action, error = "") {
 
 
 $(document).ready(function() {
-	if ($('.username_header').length) $('.username_header').text(getUser()["fio"])
+	var hrefs = {
+		"Дашборд" : "../workroom", 
+		"Транспортные единицы" : "../te", 
+		"Лаборатория" : "../lab", 
+		"Площадка разгрузки" : "../unload", 
+		"Взвешивание" : "../scale", 
+		"Акты приёмки" : "../acts" 
+		};
+	
+	if ($('.username_header').length) $('.username_header').text(getUser()["fio"]);
+	if ($('.nav').length) {
+		for (var elem in hrefs) {
+			$('.nav').append('<a href = ' + hrefs[elem] + '>' + elem + '</a>');
+		}
+	}
 });
