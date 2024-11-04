@@ -173,10 +173,12 @@ a:visited {
 	flex-direction: row;
 	justify-content: center;
 	gap: 30px;
+	text-align: center;
 }
 
 .nav a {
 	font-weight: 600;
+	font-size: 18px;
 }
 
 .flex_div {
@@ -214,6 +216,30 @@ a:visited {
 	background: #ffaa00;
 }
 
+.flex_div button:nth-child(4n+3):active {
+	color: #00bf00;
+	background: none;
+	border: 1px solid #00bf00;
+}
+
+.flex_div button:nth-child(4n+1):active {
+	color: #ea3131;
+	background: none;
+	border: 1px solid #ea3131;
+}
+
+.flex_div button:nth-child(4n+4):active {
+	color: #1E90FF;
+	background: none;
+	border: 1px solid #1E90FF;
+}
+
+.flex_div button:nth-child(4n+2):active {
+	color: #ffaa00;
+	background: none;
+	border: 1px solid #ffaa00;
+}
+
 .body table {
 	width: 100%;
 	border-collapse: collapse;
@@ -236,6 +262,10 @@ a:visited {
 	background: #eee;
 }
 
+.body input[type=checkbox] {
+	transform: scale(1.5);
+}
+
 .body h2 {
 	margin: 10px 0;
 }
@@ -254,6 +284,7 @@ a:visited {
 /*------Стилизация footer-----*/
 
 .footer {
+	position: relative;
 	bottom: 0;
 	width: 100%;
 	background: #3b3b3b;
