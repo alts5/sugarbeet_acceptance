@@ -74,5 +74,21 @@ $(document).ready(function() {
 			$('.nav').append('<a href = ' + hrefs[elem] + '>' + elem + '</a>');
 		}
 	}
+	if ($('.info_block').length) {
+		$.ajax({
+			url: 'http://' + pathToBackend + ':8000/dashboard-indicators',     
+			method: 'GET',
+			dataType: 'json',
+			data: { token : sessionStorage.getItem('token') },
+			success: function(data){
+				$('#dayAccept').text(data["dayAccept"]);
+				$('#dayReject').text(data["dayReject"]);
+				$('#dayScale').text(data["dayScale"]);
+				$('#totalAccept').text(data["totalAccept"]);
+				$('#totalReject').text(data["totalReject"]);
+				$('#totalScale').text(data["totalScale"]);
+			}
+		});
+	}
 });
 

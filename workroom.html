@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<script src = './jquery-3.7.1.min.js'></script>
 	<script src = 'service.js'></script>
+	<script src = './jquery.maskedinput.min.js'></script>
 </head>
 <body onload = "if (!getUser()) { sessionStorage.clear(); window.location.href = '/'; }">
 	<div class = "header">
@@ -27,33 +28,33 @@
 		<div class = "flex_div">
 			<div class = "info_block" data-color = "green">
 				<div>Принято за день</div>
-				<div>0</div>
+				<div id = "dayAccept">0</div>
 				<div>транспортных единиц</div>
 			</div>
 			<div class = "info_block" data-color = "red">
 				<div>Отбраковано за день</div>
-				<div>0</div>
+				<div id = "dayReject">0</div>
 				<div>транспортных единиц</div>
 			</div>
 			<div class = "info_block" data-color = "blue">
 				<div>Принято за день</div>
-				<div>0</div>
+				<div id = "dayScale">0</div>
 				<div>тонн</div>
 			</div>
 			<div class = "info_block" data-color = "green">
 				<div>Принято всего</div>
-				<div>0</div>
+				<div id = "totalAccept">0</div>
 				<div>транспортных единиц</div>
 			</div>
 			<div class = "info_block" data-color = "red">
 				<div>Отбраковано всего</div>
-				<div>0</div>
+				<div id = "totalReject">0</div>
 				<div>транспортных единиц</div>
 			</div>
 			
 			<div class = "info_block" data-color = "yellow">
 				<div>Принято всего</div>
-				<div>0</div>
+				<div id = "totalScale">0</div>
 				<div>тонн</div>
 			</div>
 		</div>
