@@ -11,49 +11,45 @@
 </head>
 <body onload = "if (!getUser()) { sessionStorage.clear(); window.location.href = '/'; }">
 	<div class = "header">
-		<span class = "logo_header" onclick = "location.href='../workroom'">
+		<span class = "logo_header">
 			<span><img src = 'favicon.png' style = "width: 40px"></span>
 			<h1>Автоматизированная система "Свёклопункт"</h1>
 		</span>
 	   
 	   <span class = "username_header"></span>
-	   <span class = "exit_header"><img src = 'power.svg' style = "width: 20px" onclick = "exitLK()"></span>
+	   <span class = "exit_header"><img src = 'power.svg' style = "width: 20px"></span>
 	</div>
 	<div class = "body">
 		<div class = "nav"></div>
 		<div class = "body_header">
-			<h2>Транспортные единицы</h2>
-			<p>В данном разделе Вы можете осуществлять регистрацию, приёмку и отбраковку транспортных единиц</p>
+			<h2>Сырьевая лаборатория</h2>
+			<p>В данном разделе Вы можете вносить сведения о лабораторных исследованиях сырья транспортных единиц</p>
 		</div>	
 		<div class = "flex_div">
 			<button onclick = "modal_window_controller('regForm', 1)">Регистрация транспортной единицы</button>
 			<button onclick = "modal_window_controller('filterForm', 1)">Установить фильтр отображения ТЕ</button>
 		</div>
 		<table>
-			<thead>
-				<tr>
-					<th>ID</th>
-					<th>Государственный рег. знак</th>
-					<th>Наименование агрофирмы</th>
-					<th>Дата и время регистрации</th>
-					<th>Состояние свёклы</th>
-					<th>Статус</th>
-					<th colspan = "4">Действия</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>Запись 1</td>
-					<td>Запись 2</td>
-					<td>Запись 3</td>
-					<td>Запись 4</td>
-					<td>Запись 5</td>
-					<td>Запись 6</td>
-					<td><img src = "reject.svg" title = "Отбраковать транспортную единицу" onclick = "modal_window_controller('rejectForm', 1)"></td>
-					<td><img src = "accept.svg" title = "Принять транспортную единицу" onclick = "modal_window_controller('acceptForm', 1)"></td>
-					<td><img src = "info.svg" title = "Распределить транспортную единицу" onclick = "modal_window_controller('distrForm', 1)"></td>
-				</tr>	
-			</tbody>
+			<tr>
+				<th>ID</th>
+				<th>Государственный рег. знак</th>
+				<th>Наименование агрофирмы</th>
+				<th>Дата и время регистрации</th>
+				<th>Состояние свёклы</th>
+				<th>Статус</th>
+				<th colspan = "4">Действия</th>
+			</tr>
+			<tr>
+				<td>Запись 1</td>
+				<td>Запись 2</td>
+				<td>Запись 3</td>
+				<td>Запись 4</td>
+				<td>Запись 4</td>
+				<td>Запись 4</td>
+				<td><img src = "reject.svg" title = "Отбраковать транспортную единицу" onclick = "modal_window_controller('rejectForm', 1)"></td>
+				<td><img src = "accept.svg" title = "Принять транспортную единицу" onclick = "modal_window_controller('acceptForm', 1)"></td>
+				<td><img src = "info.svg" title = "Распределить транспортную единицу" onclick = "modal_window_controller('distrForm', 1)"></td>
+			</tr>		
 		</table>
 	</div>
 	
@@ -76,7 +72,7 @@
 	
 	<!--Окно приёмки ТЕ-->
 	<div class = 'modal_window_lk' style = "height: 250px" id = "acceptForm">
-		<h3>Приём транспортной единицы</h3>
+		<h3>Приёмка транспортной единицы</h3>
 		<form>
 			<div>Укажите комментарий к принимаемой ТЕ</div>
 			<input name = "accept_comment" placeholder = "Например, Замечаний к принятому ТЕ нет">

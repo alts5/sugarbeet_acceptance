@@ -92,9 +92,15 @@ $(document).ready(function() {
 				$('#totalAccept').text(data["totalAccept"]);
 				$('#totalReject').text(data["totalReject"]);
 				$('#totalScale').text(data["totalScale"]);
+				for (var i=0; i < data["totalAgrofirms"].length; i++) {
+					var day = 0;
+					if (data["dayAgrofirms"][i] != undefined) day = data["dayAgrofirms"][i]["summ"];					
+					$('#agrofirmsStatic>tbody').append(
+						"<tr><td>" + data["totalAgrofirms"][i]["vendor"] + "</td><td>" + day + "</td><td>" + data["totalAgrofirms"][i]["summ"] + "</td></tr>"
+					);
+				}
 			}
 		});
 	}
-	
 });
 
