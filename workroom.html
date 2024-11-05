@@ -11,13 +11,13 @@
 </head>
 <body onload = "if (!getUser()) { sessionStorage.clear(); window.location.href = '/'; }">
 	<div class = "header">
-		<span class = "logo_header">
+		<span class = "logo_header" onclick = "location.href='../workroom'">
 			<span><img src = 'favicon.png' style = "width: 40px"></span>
 			<h1>Автоматизированная система "Свёклопункт"</h1>
 		</span>
 	   
 	   <span class = "username_header"></span>
-	   <span class = "exit_header"><img src = 'power.svg' style = "width: 20px"></span>
+	   <span class = "exit_header"><img src = 'power.svg' style = "width: 20px" onclick = "exitLK()"></span>
 	</div>
 	<div class = "body" >
 		<div class = "nav"></div>
@@ -60,41 +60,45 @@
 		</div>
 		<h3>Статистика по агрофирмам</h3>
 		<table>
-			<tr>
-				<th>Наименование агрофирмы</th>
-				<th>Принято за день, тонн</th>
-				<th>Принято всего, тонн</th>
-			</tr>
-			<tr>
-				<td>Агрофирма "Аняк"</td>
-				<td>0</td>
-				<td>0</td>
-			</tr>
-			<tr>
-				<td>Агрофирма "Аняк"</td>
-				<td>0</td>
-				<td>0</td>
-			</tr>
-			<tr>
-				<td>Агрофирма "Аняк"</td>
-				<td>0</td>
-				<td>0</td>
-			</tr>
-			<tr>
-				<td>Агрофирма "Аняк"</td>
-				<td>0</td>
-				<td>0</td>
-			</tr>
-			<tr>
-				<td>Агрофирма "Аняк"</td>
-				<td>0</td>
-				<td>0</td>
-			</tr>
-			<tr>
-				<td>Агрофирма "Аняк"</td>
-				<td>0</td>
-				<td>0</td>
-			</tr>
+			<thead>
+				<tr>
+					<th>Наименование агрофирмы</th>
+					<th>Принято за день, тонн</th>
+					<th>Принято всего, тонн</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Агрофирма "Аняк"</td>
+					<td>0</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<td>Агрофирма "Аняк"</td>
+					<td>0</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<td>Агрофирма "Аняк"</td>
+					<td>0</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<td>Агрофирма "Аняк"</td>
+					<td>0</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<td>Агрофирма "Аняк"</td>
+					<td>0</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<td>Агрофирма "Аняк"</td>
+					<td>0</td>
+					<td>0</td>
+				</tr>
+			</tbody>
 		</table>
 	</div>
 	<script src = 'app.js'></script>

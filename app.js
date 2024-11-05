@@ -57,6 +57,11 @@ function modal_window_controller(elem, action) {
 	}
 }
 
+function exitLK() {
+	sessionStorage.clear();
+	window.location.reload();
+}
+
 $(document).ready(function() {
 	$('.dateMask').mask('99.99.9999');
 	var hrefs = {
@@ -90,5 +95,6 @@ $(document).ready(function() {
 			}
 		});
 	}
+	
 });
 
