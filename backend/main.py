@@ -74,5 +74,4 @@ def dashboardIndicators(token : str):
     result["dayAccept"] = mysql_query(f"SELECT COUNT(*) AS 'count' FROM te WHERE accept_stat = 1 AND time BETWEEN '{date.today()} 00:00:00' AND '{date.today()} 23:59:59'")[0]['count']
     result["dayReject"] = mysql_query(f"SELECT COUNT(*) AS 'count' FROM te WHERE reject_stat = 1 AND time BETWEEN '{date.today()} 00:00:00' AND '{date.today()} 23:59:59'")[0]['count']
     result["dayScale"] = mysql_query(f"SELECT SUM(info_primary_weighted- info_secondary_weighted) as summ FROM scale_operator INNER JOIN te ON scale_operator.staff_soid = te.staff_soid WHERE te.time BETWEEN '{date.today()} 00:00:00' AND '{date.today()} 23:59:59'")[0]['summ']
-    print(result)
     return JSONResponse(content=result)
