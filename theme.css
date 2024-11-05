@@ -318,7 +318,7 @@ a:visited {
 	text-align: center;
 }
 
-.body table tr:nth-child(2n) {
+.body table tbody tr:nth-child(2n + 1) {
 	background: #eee;
 }
 
