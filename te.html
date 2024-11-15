@@ -26,10 +26,10 @@
 			<p>В данном разделе Вы можете осуществлять регистрацию, приёмку и отбраковку транспортных единиц</p>
 		</div>	
 		<div class = "flex_div">
-			<button onclick = "modal_window_controller('regForm', 1)">Регистрация транспортной единицы</button>
-			<button onclick = "modal_window_controller('filterForm', 1)">Установить фильтр отображения ТЕ</button>
+			<button onclick = "modal_window_controller('regForm_window', 1)">Регистрация транспортной единицы</button>
+			<button onclick = "getTElist()">Обновить список транспортных единиц</button>
 		</div>
-		<table>
+		<table id = "teListTable">
 			<thead>
 				<tr>
 					<th>ID</th>
@@ -42,17 +42,6 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr>
-					<td>Запись 1</td>
-					<td>Запись 2</td>
-					<td>Запись 3</td>
-					<td>Запись 4</td>
-					<td>Запись 5</td>
-					<td>Запись 6</td>
-					<td><img src = "reject.svg" title = "Отбраковать транспортную единицу" onclick = "modal_window_controller('rejectForm', 1)"></td>
-					<td><img src = "accept.svg" title = "Принять транспортную единицу" onclick = "modal_window_controller('acceptForm', 1)"></td>
-					<td><img src = "info.svg" title = "Распределить транспортную единицу" onclick = "modal_window_controller('distrForm', 1)"></td>
-				</tr>	
 			</tbody>
 		</table>
 	</div>
@@ -60,94 +49,82 @@
 	<div class = 'modal_wrap_lk'></div>
 	
 	<!--Окно отбраковки ТЕ-->
-	<div class = 'modal_window_lk' style = "height: 280px" id = "rejectForm">
+	<div class = 'modal_window_lk' style = "height: 300px" id = "rejectForm_window">
 		<h3>Отбраковка транспортной единицы</h3>
-		<form>
+		<form id = 'reject_form'>
 			<div>Укажите причину отбраковки ТЕ</div>
-			<input name = "reject_comment" placeholder = "Например, Сырье принимаемой ТЕ не подлежит приемке">
-			<div class = "modal_buttons_panel">
-				<button class = "modal_button" data-type = "confirm">Подтвердить</button>
-				<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('rejectForm', 0)">Отменить</button>
-			</div>
+			<input name = "reject_comment" placeholder = "Например, Сырье принимаемой ТЕ не подлежит приемке" required value = 'Сырье принимаемой ТЕ не подлежит приемке'>
 			<input name = "id_te" class = "hidden_form_field">
+			<input name = "token" class = "hidden_form_field">
 		</form>
+		<div class = "modal_buttons_panel">
+			<button class = "modal_button" data-type = "confirm" onclick = "$('#reject_form').submit()">Подтвердить</button>
+			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('rejectForm_window', 0)">Отменить</button>
+		</div>
 	</div>
 
 	
 	<!--Окно приёмки ТЕ-->
-	<div class = 'modal_window_lk' style = "height: 250px" id = "acceptForm">
+	<div class = 'modal_window_lk' style = "height: 270px" id = "acceptForm_window">
 		<h3>Приём транспортной единицы</h3>
-		<form>
+		<form id = 'accept_form'>
 			<div>Укажите комментарий к принимаемой ТЕ</div>
-			<input name = "accept_comment" placeholder = "Например, Замечаний к принятому ТЕ нет">
-			<div class = "modal_buttons_panel">
-				<button class = "modal_button" data-type = "confirm">Подтвердить</button>
-				<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('acceptForm', 0)">Отменить</button>
-			</div>
+			<input name = "accept_comment" placeholder = "Например, Замечаний к принятому ТЕ нет" required value = 'Замечаний к принятому ТС нет'>
 			<input name = "id_te" class = "hidden_form_field">
+			<input name = "token" class = "hidden_form_field">
 		</form>
+		<div class = "modal_buttons_panel">
+			<button class = "modal_button" data-type = "confirm" onclick = "$('#accept_form').submit()">Подтвердить</button>
+			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('acceptForm_window', 0)">Отменить</button>
+		</div>
+		<div class = "error_base">Проверьте вводимые данные</div>
 	</div>
 	
 	<!--Окно распределения ТЕ-->
-	<div class = 'modal_window_lk' style = "height: 290px" id = "distrForm">
+	<div class = 'modal_window_lk' style = "height: 400px" id = "distrForm_window">
 		<h3>Распределение транспортной единицы</h3>
-		<form>
+		<form id = 'distr_form'>
 			<div>Распределить ТЕ на </div>
-			<select name = "distr_place" placeholder = "Выберите место распределения">
+			<select name = "distr_place" placeholder = "Выберите место распределения" required>
 				<option>Анализ показателей, вызвавших сомнение, в сырьевой лаборатории</option>
 				<option>Взвешивание</option>
 				<option>Взвешивание и последующий лабораторный контроль</option>
 			</select>
-			<div class = "modal_buttons_panel">
-				<button class = "modal_button" data-type = "confirm">Подтвердить</button>
-				<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('distrForm', 0)">Отменить</button>
-			</div>
+			<div>Комментарий к распределению</div>
+			<input name = "distr_comment" placeholder = "Например, оценить сахаристость">
 			<input name = "id_te" class = "hidden_form_field">
+			<input name = "token" class = "hidden_form_field">
 		</form>
+		<div class = "modal_buttons_panel">
+			<button class = "modal_button" data-type = "confirm" onclick = "$('#distr_form').submit()">Подтвердить</button>
+			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('distrForm_window', 0)">Отменить</button>
+		</div>
+		<div class = "error_base">Проверьте вводимые данные</div>
 	</div>
 	
 	<!--Окно добавления ТЕ-->
-	<div class = 'modal_window_lk' id = "regForm" style = "height: 600px">
+	<div class = 'modal_window_lk' id = "regForm_window" style = "height: 620px">
 		<h3>Регистрация транспортной единицы</h3>
-		<form>
+		<form id = "reg_form">
 			<div>Наименование агрофирмы</div>
-			<input name = "vendor" placeholder = 'Например, Агрофирма "Сарманово"'>
+			<input name = "vendor" placeholder = 'Например, Агрофирма Сарманово' required>
 			<div>Государственный регистрационный знак ТЕ</div>
-			<input name = "regnum" placeholder = 'Например, А015АА116'>
+			<input name = "regnum" placeholder = 'Например, А015АА116' required>
 			<div>Описание характеристик свёклы</div>
-			<input name = "characts" placeholder = 'Например, Без гнили, без ботвы'>
+			<select name = "characts" placeholder = "Выберите статус" required>
+				<option>Соответствует характеристикам</option>
+				<option>Не соответствует характеристикам</option>
+			</select>
 			<div>Комментарий</div>
 			<input name = "note" placeholder = 'Например, Прибыла без накладной'>
-			<div class = "modal_buttons_panel">
-				<button class = "modal_button" data-type = "confirm">Подтвердить</button>
-				<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('regForm', 0)">Отменить</button>
-			</div>
-			<input name = "id_te" class = "hidden_form_field">
+			<input name = "token" class = "hidden_form_field">
 		</form>
+		<div class = "modal_buttons_panel">
+			<button class = "modal_button" data-type = "confirm" onclick = "$('#reg_form').submit()">Подтвердить</button>
+			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('regForm_window', 0)">Отменить</button>
+		</div>
+		<div class = "error_base">Проверьте вводимые данные</div>
 	</div>
-	
-	<!--Окно филтра списка ТЕ-->
-	<div class = 'modal_window_lk' id = "filterForm" style = "height: 360px">
-		<h3>Настройка фильтра отображения</h3>
-		<form>
-			<div>Дата, за которую отображается список</div>
-			<input name = "vendor" placeholder = 'Например, 01.01.1970' class = "dateMask">
-			<div>Статус транспортных единиц</div>
-			<select name = "distr_place" placeholder = "Выберите статус">
-				<option>Принята</option>
-				<option>Отбракована</option>
-				<option>Прибыла в свёклопункт</option>
-				<option>Распределена</option>
-				<option>Ожидает подтверждения</option>
-			</select>
-			<div class = "modal_buttons_panel">
-				<button class = "modal_button" data-type = "confirm">Подтвердить</button>
-				<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('filterForm', 0)">Отменить</button>
-			</div>
-			<input name = "id_te" class = "hidden_form_field">
-		</form>
-	</div>
-	
 	<script src = 'app.js'></script>
 </body>
 </html>
