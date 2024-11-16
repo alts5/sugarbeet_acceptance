@@ -89,7 +89,15 @@ def TE_list(token : str):
     if user is None:
         raise HTTPException(status_code=401, detail="Клиент не авторизован")
 
-    result = mysql_query(f"SELECT id_te, transport_reg_num as regnum, vendor_item as vendor, time, sugar_beet_charact as characts FROM te LEFT JOIN scale_operator ON te.staff_soid = scale_operator.staff_soid WHERE reject_stat = '0' and accept_stat = '0' and (scale_operator.info_secondary_weighted != 0 or distr_stat = '0') ORDER BY time ASC")
+    result = mysql_query(f'''
+    SELECT te.id_te, transport_reg_num as regnum, vendor_item as vendor, time, sugar_beet_charact as characts, destination, primary_checking_info as result FROM te 
+    LEFT JOIN scale_operator ON te.staff_soid = scale_operator.staff_soid 
+    LEFT JOIN distr_report ON te.id_te = distr_report.id_te 
+    LEFT JOIN laborant ON te.staff_lid = laborant.staff_lid 
+    WHERE reject_stat = '0' and accept_stat = '0' 
+    and (distr_report.destination = 'Анализ показателей, вызвавших сомнение, в сырьевой лаборатории' or distr_report.destination is NULL)
+    ORDER BY time DESC
+    ''')
     if result is not None:
         for elem in result:
             elem["time"] = elem["time"].strftime('%d.%m.%Y %H:%M:%S')
@@ -104,7 +112,7 @@ def add_te(token = Form(), vendor = Form(), regnum = Form(), characts = Form(), 
     user = get_user(token)
     if user is None:
         raise HTTPException(status_code=401, detail="Клиент не авторизован")
-    if token == "" or regnum == "" or characts == "":
+    if token == "" or regnum == "" or vendor == "" or characts == "":
         raise HTTPException(status_code=422, detail="Не заполнены поля формы")
 
     mysql_query(f"INSERT INTO te(vendor_item, transport_reg_num, sugar_beet_charact, note) VALUES ('{vendor}', '{regnum}', '{characts}', '{note}')")
@@ -140,8 +148,12 @@ def distr_te(token = Form(), distr_place = Form(), distr_comment = Form(), id_te
     if token == "" or distr_place == "" or id_te == "":
         raise HTTPException(status_code=422, detail="Не заполнены поля формы")
 
-    mysql_query(f"UPDATE te SET distr_stat = '1' WHERE id_te = '{id_te}'")
-    mysql_query(f"INSERT INTO distr_report(id_te,destination,note) VALUES ('{id_te}','{distr_place}','{distr_comment}')")
+    check_dest_query = mysql_query(f"SELECT destination FROM distr_report WHERE id_te = '{id_te}' ORDER by rep_id DESC LIMIT 1")
+    if check_dest_query is None:
+        mysql_query(f"UPDATE te SET distr_stat = '1' WHERE id_te = '{id_te}'")
+        mysql_query(f"INSERT INTO distr_report(id_te,destination,note) VALUES ('{id_te}','{distr_place}','{distr_comment}')")
+    else:
+        mysql_query(f"UPDATE distr_report SET id_te = '{id_te}',destination = '{distr_place}', note = '{distr_comment}' WHERE id_te = '{id_te}'")
 
 
 @app.get('/te-list-unchecked-lab')
@@ -152,8 +164,9 @@ def TE_list_unchecked_in_lab(token : str):
 
     result = mysql_query(f'''SELECT te.id_te, transport_reg_num as regnum 
     FROM te INNER JOIN distr_report ON te.id_te = distr_report.id_te 
-    WHERE reject_stat = '0' and accept_stat = '0' and (primary_check_stat = '0' or secondary_check_stat = '0')
-    AND (distr_report.destination = 'Анализ показателей, вызвавших сомнение, в сырьевой лаборатории' or distr_report.destination = 'Взвешивание и последующий лабораторный контроль') 
+    WHERE reject_stat = '0' and accept_stat = '0'
+    AND (distr_report.destination = 'Анализ показателей, вызвавших сомнение, в сырьевой лаборатории' and primary_check_stat = '0'
+        OR distr_report.destination = 'Взвешивание и последующий лабораторный контроль' and secondary_check_stat = '0') 
     ORDER BY time ASC''')
     return JSONResponse(content=result)
 
@@ -182,3 +195,19 @@ def add_lab_result(token = Form(), id_te = Form(), type_control = Form(), result
     else:
         raise HTTPException(status_code=422, detail="Неверный вид контроля для распределения ТЕ")
 
+@app.get('/lab-list')
+def TE_list(token : str):
+    user = get_user(token)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Клиент не авторизован")
+
+    result = mysql_query(f'''SELECT te.id_te, primary_checking_info AS prima, secondary_checking_info AS 'secondary', transport_reg_num as regnum, destination as stat, fio FROM distr_report 
+                            INNER JOIN te ON distr_report.id_te = te.id_te
+                            LEFT JOIN laborant ON te.staff_lid = laborant.staff_lid
+                            LEFT JOIN usertbl ON  usertbl.user = laborant.user
+                            WHERE (destination = "Анализ показателей, вызвавших сомнение, в сырьевой лаборатории" OR destination = "Взвешивание и последующий лабораторный контроль")
+                            AND reject_stat = '0' AND accept_stat = '0'
+                            ORDER BY te.time DESC;
+                            ''')
+    if result is not None:
+        return JSONResponse(content=result)

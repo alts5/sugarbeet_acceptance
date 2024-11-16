@@ -27,7 +27,7 @@
 		</div>	
 		<div class = "flex_div">
 			<button onclick = "modal_window_controller('regForm_window', 1)">Регистрация транспортной единицы</button>
-			<button onclick = "getTElist()">Обновить список транспортных единиц</button>
+			<button onclick = "getTElistForTable()">Обновить список транспортных единиц</button>
 		</div>
 		<table id = "teListTable">
 			<thead>
@@ -37,6 +37,7 @@
 					<th>Наименование агрофирмы</th>
 					<th>Дата и время регистрации</th>
 					<th>Состояние свёклы</th>
+					<th>Распределение</th>
 					<th>Статус</th>
 					<th colspan = "4">Действия</th>
 				</tr>
@@ -109,7 +110,7 @@
 			<div>Наименование агрофирмы</div>
 			<input name = "vendor" placeholder = 'Например, Агрофирма Сарманово' required>
 			<div>Государственный регистрационный знак ТЕ</div>
-			<input name = "regnum" placeholder = 'Например, А015АА116' required>
+			<input name = "regnum" placeholder = 'Например, А015АА116' required oninput="this.value = this.value.toUpperCase()">
 			<div>Описание характеристик свёклы</div>
 			<select name = "characts" placeholder = "Выберите статус" required>
 				<option>Соответствует характеристикам</option>

@@ -215,10 +215,14 @@ $(document).ready(function() {
 	if ($('#teListTable').length) {
 		getTElistForTable();
 	}
+	if ($('#labListTable').length) {
+		getLablistForTable();
+	}
 	if ($('#labAdd_form select[name="id_te"]').length) {
 		getTElistUncheckedLab();
 	}
 });
+
 
 function getTElistForTable() {
 	$.ajax({
@@ -231,11 +235,19 @@ function getTElistForTable() {
 					$('#teListTable>tbody').empty();
 					for (var i = 0; i < data.length; i++) {
 						var te_id = data[i]["id_te"];
+						var dest = data[i]["destination"] || "Ожидает распределения";
+						var warnIcon = "<td></td>";
+						
+						if (data[i]["result"]) {
+							warnIcon = "<td><img src = 'warn.svg' title = 'Результат исследования: " + data[i]["result"]+ "'></td>"
+						}
+						
 						$('#teListTable>tbody').append(
-							"<tr><td>" + te_id + "</td><td>" + data[i]["regnum"] + "</td><td>" + data[i]["vendor"] + "</td><td>" + data[i]["time"] + "</td><td>" + data[i]["characts"] + "</td><td>" + data[i]["status"] + "</td>"
+							"<tr><td>" + te_id + "</td><td>" + data[i]["regnum"] + "</td><td>" + data[i]["vendor"] + "</td><td>" + data[i]["time"] + "</td><td>" + data[i]["characts"] + "</td><td>" + data[i]["status"] + "</td><td>" + dest + "</td>"
 							+ "<td><img src = 'reject.svg' title = 'Отбраковать транспортную единицу' onclick = 'modal_window_controller(\"rejectForm_window\", 1, " +  te_id + ")'></td>"
 							+ "<td><img src = 'accept.svg' title = 'Принять транспортную единицу' onclick = 'modal_window_controller(\"acceptForm_window\", 1, " +  te_id + ")'></td>"
 							+ "<td><img src = 'info.svg' title = 'Распределить транспортную единицу' onclick = 'modal_window_controller(\"distrForm_window\", 1, " +  te_id + ")'></td>"
+							+ warnIcon
 							+ "</tr>"
 						);
 					}
@@ -244,6 +256,33 @@ function getTElistForTable() {
 		});
 }
 
+function getLablistForTable() {
+	$.ajax({
+			url: 'http://' + pathToBackend + ':8000/lab-list',     
+			method: 'GET',
+			dataType: 'json',
+			data: { token : sessionStorage.getItem('token') },
+			success: function(data) {
+				if (data != undefined) {
+					$('#labListTable>tbody').empty();
+					for (var i = 0; i < data.length; i++) {
+						var te_id = data[i]["id_te"];
+						var prima = data[i]["prima"] || "-";
+						var secondary = data[i]["secondary"] || "-";
+						var user = data[i]["fio"] || "-";
+						
+						$('#labListTable>tbody').append(
+							"<tr><td>" + te_id + "</td><td>" + data[i]["regnum"] + "</td><td>" + prima + "</td><td>" + secondary + "</td><td>" + user + "</td><td>" + data[i]["stat"] + "</td>"
+							+ "</tr>"
+						);
+					}
+				}
+			}
+		});
+}
+
+setInterval(getTElistForTable, 3000);
+setInterval(getLablistForTable, 3000);
 
 function getTElistUncheckedLab() {
 	$.ajax({
@@ -263,7 +302,7 @@ function getTElistUncheckedLab() {
 					}
 				}
 				else {
-					$('#labAdd_form select[name="id_te"]').append("<option disabled selected hidden>Выберите госрегзнак ТЕ</option>");
+					$('#labAdd_form select[name="id_te"]').append("<option value = '' selected hidden>Выберите госрегзнак ТЕ</option>");
 				}
 			}
 		});
