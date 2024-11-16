@@ -116,6 +116,10 @@ def add_te(token = Form(), vendor = Form(), regnum = Form(), characts = Form(), 
         raise HTTPException(status_code=422, detail="Не заполнены поля формы")
 
     mysql_query(f"INSERT INTO te(vendor_item, transport_reg_num, sugar_beet_charact, note) VALUES ('{vendor}', '{regnum}', '{characts}', '{note}')")
+    te = mysql_query(f"SELECT id_te FROM te ORDER BY id_te DESC LIMIT 1")[0]["id_te"]
+    mysql_query(f"INSERT INTO operator(accepting_data,user) VALUES ('Прибыла с свёклопункт','{user[0]["user"]}')")
+    operator = mysql_query(f"SELECT staff_id FROM operator ORDER BY staff_id DESC LIMIT 1")[0]["staff_id"]
+    mysql_query(f"INSERT INTO operator_te(staff_id,id_te) VALUES ('{operator}','{te}')")
 
 
 @app.post('/reject-te')
@@ -188,20 +192,23 @@ def add_lab_result(token = Form(), id_te = Form(), type_control = Form(), result
             mysql_query(f"INSERT INTO laborant({type_control}_checking_info, user) VALUES ('{result}','{user[0]['user']}')")
             staff_lid = mysql_query(f"SELECT staff_lid FROM laborant ORDER by staff_lid DESC LIMIT 1")[0]["staff_lid"]
             mysql_query(f"UPDATE te SET staff_lid = '{staff_lid}', {type_control}_check_stat = '1' WHERE id_te = '{id_te}'")
-        elif check_query[f"{type_control}_check_stat"] == '0':
-            mysql_query(f"UPDATE te SET {type_control}_check_stat = '1' WHERE id_te = '{id_te}'")
+        elif check_query[f"secondary_check_stat"] == '0':
+            mysql_query(f"UPDATE te SET secondary_check_stat = '1' WHERE id_te = '{id_te}'")
+            staff_lid = mysql_query(f"SELECT staff_lid FROM te WHERE id_te = '{id_te}'")[0]["staff_lid"]
+            mysql_query(f"UPDATE laborant SET {type_control}_checking_info = '{result}', user_final = {user[0]["user"]} WHERE staff_lid = '{staff_lid}'")
         else:
             raise HTTPException(status_code=422, detail="Результаты данного вида контроля для ТЕ уже внесены")
     else:
         raise HTTPException(status_code=422, detail="Неверный вид контроля для распределения ТЕ")
 
+
 @app.get('/lab-list')
-def TE_list(token : str):
+def lab_list(token : str):
     user = get_user(token)
     if user is None:
         raise HTTPException(status_code=401, detail="Клиент не авторизован")
 
-    result = mysql_query(f'''SELECT te.id_te, primary_checking_info AS prima, secondary_checking_info AS 'secondary', transport_reg_num as regnum, destination as stat, fio FROM distr_report 
+    result = mysql_query(f'''SELECT usertbl.user, te.id_te, primary_checking_info AS prima, secondary_checking_info AS 'secondary', transport_reg_num as regnum, destination as stat, fio, laborant.user_final FROM distr_report 
                             INNER JOIN te ON distr_report.id_te = te.id_te
                             LEFT JOIN laborant ON te.staff_lid = laborant.staff_lid
                             LEFT JOIN usertbl ON  usertbl.user = laborant.user
@@ -210,4 +217,68 @@ def TE_list(token : str):
                             ORDER BY te.time DESC;
                             ''')
     if result is not None:
+        for elem in result:
+            if elem["user_final"] is not None:
+                elem["user_final"] = mysql_query(f"SELECT fio FROM usertbl WHERE user = '{elem["user_final"]}'")[0]["fio"]
+        return JSONResponse(content=result)
+
+@app.get('/te-list-unweighted-scale')
+def TE_list_unweighted_in_scale(token : str):
+    user = get_user(token)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Клиент не авторизован")
+
+    result = mysql_query(f'''SELECT te.id_te, transport_reg_num as regnum 
+    FROM te INNER JOIN distr_report ON te.id_te = distr_report.id_te 
+    WHERE reject_stat = '0' and accept_stat = '0'
+    AND (distr_report.destination = 'Взвешивание' OR distr_report.destination = 'Взвешивание и последующий лабораторный контроль') 
+    ORDER BY time ASC''')
+    return JSONResponse(content=result)
+
+
+@app.post('/scale-add-result')
+def add_scale_result(token = Form(), id_te = Form(), stage = Form(), result = Form()):
+    user = get_user(token)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Клиент не авторизован")
+
+    if token == "" or stage == "" or float(result) <= 0 or id_te == "":
+        raise HTTPException(status_code=422, detail="Не заполнены поля формы")
+
+    check_query = mysql_query(f"SELECT staff_soid, primary_weighted_stat FROM te WHERE id_te = '{id_te}'")[0]
+    check_dest_query = mysql_query(f"SELECT destination FROM distr_report WHERE id_te = '{id_te}' ORDER by rep_id DESC LIMIT 1")[0]
+    check_scale_query = mysql_query(f"SELECT info_primary_weighted as fst, info_secondary_weighted as snd FROM scale_operator INNER JOIN te ON scale_operator.staff_soid = te.staff_soid WHERE te.id_te = '{id_te}'")
+
+    if (check_dest_query["destination"] == "Взвешивание" or check_dest_query["destination"] == "Взвешивание и последующий лабораторный контроль") :
+        if check_query["staff_soid"] is None and stage == "primary":
+            mysql_query(f"INSERT INTO scale_operator(info_{stage}_weighted, user) VALUES ({float(result)},'{user[0]['user']}')")
+            staff_soid = mysql_query(f"SELECT staff_soid FROM scale_operator ORDER by staff_soid DESC LIMIT 1")[0]["staff_soid"]
+            mysql_query(f"UPDATE te SET staff_soid = '{staff_soid}', primary_weighted_stat = '1' WHERE id_te = '{id_te}'")
+        elif check_query[f"primary_weighted_stat"] == '1' and stage == "secondary" and check_scale_query[0]["snd"] == 0 and float(result) > 0 and \
+                check_scale_query[0]["fst"] > check_scale_query[0]["snd"] :
+            staff_soid = mysql_query(f"SELECT staff_soid FROM te WHERE id_te = '{id_te}'")[0]["staff_soid"]
+            mysql_query(f"UPDATE `scale_operator` SET info_secondary_weighted = {float(result)}, user_final = {user[0]["user"]}  WHERE staff_soid = '{staff_soid}'")
+        else:
+            raise HTTPException(status_code=422, detail="Результаты указанного этапа для ТЕ уже внесены")
+    else:
+        raise HTTPException(status_code=422, detail="Неверный этап для распределения ТЕ")
+
+@app.get('/scale-list')
+def Scale_list(token : str):
+    user = get_user(token)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Клиент не авторизован")
+
+    result = mysql_query(f'''SELECT usertbl.user, te.id_te, info_primary_weighted as fst, info_secondary_weighted as snd, transport_reg_num as regnum, destination, fio, scale_operator.user_final FROM te 
+                            LEFT JOIN distr_report ON te.id_te = distr_report.id_te
+                            INNER JOIN scale_operator ON te.staff_soid = scale_operator.staff_soid
+                            LEFT JOIN usertbl ON  usertbl.user = scale_operator.user
+                            WHERE (destination = "Взвешивание" OR destination = "Взвешивание и последующий лабораторный контроль")
+                            AND reject_stat = '0' AND accept_stat = '0'
+                            ORDER BY te.time DESC;
+                            ''')
+    if result is not None:
+        for elem in result:
+            if elem["user_final"] is not None:
+                elem["user_final"] = mysql_query(f"SELECT fio FROM usertbl WHERE user = '{elem["user_final"]}'")[0]["fio"]
         return JSONResponse(content=result)

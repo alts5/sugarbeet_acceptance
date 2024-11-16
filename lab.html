@@ -36,7 +36,7 @@
 					<th>Государственный рег. знак</th>
 					<th>Результат контроля вызвавших сомнение показателей</th>
 					<th>Результат контроля физико-химических показателей</th>
-					<th>Лаборант</th>
+					<th>Лаборанты</th>
 					<th>Статус</th>
 				</tr>
 			</thead>
@@ -66,23 +66,6 @@
 		<div class = "modal_buttons_panel">
 			<button class = "modal_button" data-type = "confirm" onclick = "$('#labAdd_form').submit()">Подтвердить</button>
 			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('labAddForm_window', 0)">Отменить</button>
-		</div>
-		<div class = "error_base">Проверьте вводимые данные</div>
-	</div>
-
-	
-	<!--Окно приёмки ТЕ-->
-	<div class = 'modal_window_lk' style = "height: 280px" id = "acceptForm_window">
-		<h3>Приём транспортной единицы</h3>
-		<form id = 'accept_form'>
-			<div>Укажите комментарий к принимаемой ТЕ</div>
-			<input name = "accept_comment" placeholder = "Например, Замечаний к принятому ТЕ нет" required value = 'Замечаний к принятому ТС нет'>
-			<input name = "id_te" class = "hidden_form_field">
-			<input name = "token" class = "hidden_form_field">
-		</form>
-		<div class = "modal_buttons_panel">
-			<button class = "modal_button" data-type = "confirm" onclick = "$('#accept_form').submit()">Подтвердить</button>
-			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('acceptForm_window', 0)">Отменить</button>
 		</div>
 	</div>
 		

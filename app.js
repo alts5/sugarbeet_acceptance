@@ -39,7 +39,7 @@ $('#reg_form').on('submit', function(e) {
 				window.location.reload();
 			},
 			error: function(data) {
-				errorPushWindow(data.responseJSON["detail"]);
+				errorPushWindow(data);
 			}
 		});
 	return false;
@@ -59,7 +59,7 @@ $('#reject_form').on('submit', function(e) {
 				window.location.reload();
 			},
 			error: function(data) {
-				errorPushWindow(data.responseJSON["detail"]);
+				errorPushWindow(data);
 			}
 		});
 	return false;
@@ -79,7 +79,7 @@ $('#accept_form').on('submit', function(e) {
 				window.location.reload();
 			},
 			error: function(data) {
-				errorPushWindow(data.responseJSON["detail"]);
+				errorPushWindow(data);
 			}
 		});
 	return false;
@@ -99,7 +99,7 @@ $('#distr_form').on('submit', function(e) {
 				window.location.reload();
 			},
 			error: function(data) {
-				errorPushWindow(data.responseJSON["detail"]);
+				errorPushWindow(data);
 			}
 		});
 	return false;
@@ -118,14 +118,34 @@ $('#labAdd_form').on('submit', function(e) {
 				window.location.reload();
 			},
 			error: function(data) {
-				errorPushWindow(data.responseJSON["detail"]);
+				errorPushWindow(data);
+			}
+		});
+	return false;
+});
+
+$('#scaleAdd_form').on('submit', function(e) {
+	e.preventDefault();
+	$('form [name="token"]').val(sessionStorage.getItem('token'));
+	$.ajax({
+			url: 'http://' + pathToBackend + ':8000/scale-add-result',     
+			method: 'POST',
+			dataType: 'json',
+			contentType: "application/x-www-form-urlencoded",
+			data: $(this).serialize(),
+			success: function(data){
+				window.location.reload();
+			},
+			error: function(data) {
+				errorPushWindow(data);
 			}
 		});
 	return false;
 });
 
 function errorPushWindow(msg) {
-	alert(msg);
+	if (msg.responseJSON) alert(msg.responseJSON["detail"]);
+	else alert("При взаимодействии с сервером произошла ошибка. Проверьте поля ввода данных");
 }
 
 function checkEmptyFieldsInForm(formId) {
@@ -218,8 +238,14 @@ $(document).ready(function() {
 	if ($('#labListTable').length) {
 		getLablistForTable();
 	}
+	if ($('#scaleListTable').length) {
+		getScalelistForTable()
+	}
 	if ($('#labAdd_form select[name="id_te"]').length) {
 		getTElistUncheckedLab();
+	}
+	if ($('#scaleAdd_form select[name="id_te"]').length) {
+		getTElistUnweightedScale();
 	}
 });
 
@@ -270,9 +296,10 @@ function getLablistForTable() {
 						var prima = data[i]["prima"] || "-";
 						var secondary = data[i]["secondary"] || "-";
 						var user = data[i]["fio"] || "-";
+						var user_final = data[i]["user_final"] || "-";
 						
 						$('#labListTable>tbody').append(
-							"<tr><td>" + te_id + "</td><td>" + data[i]["regnum"] + "</td><td>" + prima + "</td><td>" + secondary + "</td><td>" + user + "</td><td>" + data[i]["stat"] + "</td>"
+							"<tr><td>" + te_id + "</td><td>" + data[i]["regnum"] + "</td><td>" + prima + "</td><td>" + secondary + "</td><td>" + user + " / " + user_final + "</td><td>" + data[i]["stat"] + "</td>"
 							+ "</tr>"
 						);
 					}
@@ -283,6 +310,7 @@ function getLablistForTable() {
 
 setInterval(getTElistForTable, 3000);
 setInterval(getLablistForTable, 3000);
+setInterval(getScalelistForTable, 3000);
 
 function getTElistUncheckedLab() {
 	$.ajax({
@@ -303,6 +331,56 @@ function getTElistUncheckedLab() {
 				}
 				else {
 					$('#labAdd_form select[name="id_te"]').append("<option value = '' selected hidden>Выберите госрегзнак ТЕ</option>");
+				}
+			}
+		});
+}
+
+function getTElistUnweightedScale() {
+	$.ajax({
+			url: 'http://' + pathToBackend + ':8000/te-list-unweighted-scale',     
+			method: 'GET',
+			dataType: 'json',
+			data: { token : sessionStorage.getItem('token') },
+			success: function(data) {
+				if (data != undefined) {
+					$('#scaleAdd_form select[name="id_te"]').empty();
+					
+					for (var i = 0; i < data.length; i++) {
+						var te_id = data[i]["id_te"];
+						$('#scaleAdd_form select[name="id_te"]').append(
+							"<option value = " + te_id + ">" + data[i]["regnum"] + "</option>"
+						);
+					}
+				}
+				else {
+					$('#scaleAdd_form select[name="id_te"]').append("<option value = '' selected hidden>Выберите госрегзнак ТЕ</option>");
+				}
+			}
+		});
+}
+
+function getScalelistForTable() {
+	$.ajax({
+			url: 'http://' + pathToBackend + ':8000/scale-list',     
+			method: 'GET',
+			dataType: 'json',
+			data: { token : sessionStorage.getItem('token') },
+			success: function(data) {
+				if (data != undefined) {
+					$('#scaleListTable>tbody').empty();
+					for (var i = 0; i < data.length; i++) {
+						var te_id = data[i]["id_te"];
+						var prima = data[i]["fst"] || "-";
+						var secondary = data[i]["snd"] || "-";
+						var user = data[i]["fio"] || "-";
+						var user_final = data[i]["user_final"] || "-";
+						
+						$('#scaleListTable>tbody').append(
+							"<tr><td>" + te_id + "</td><td>" + data[i]["regnum"] + "</td><td>" + prima + "</td><td>" + secondary + "</td><td>" + user + " / " + user_final + "</td><td>" + data[i]["stat"] + "</td>"
+							+ "</tr>"
+						);
+					}
 				}
 			}
 		});
