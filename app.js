@@ -1,4 +1,5 @@
 var pathToBackend = window.location.hostname;
+var pathToBackend = window.location.hostname;
 
 $('#auth_form').on('submit', function(e) {
 	e.preventDefault();
@@ -143,6 +144,26 @@ $('#scaleAdd_form').on('submit', function(e) {
 	return false;
 });
 
+
+$('#unloadAdd_form').on('submit', function(e) {
+	e.preventDefault();
+	$('form [name="token"]').val(sessionStorage.getItem('token'));
+	$.ajax({
+			url: 'http://' + pathToBackend + ':8000/unload-add-result',     
+			method: 'POST',
+			dataType: 'json',
+			contentType: "application/x-www-form-urlencoded",
+			data: $(this).serialize(),
+			success: function(data){
+				window.location.reload();
+			},
+			error: function(data) {
+				errorPushWindow(data);
+			}
+		});
+	return false;
+});
+
 function errorPushWindow(msg) {
 	if (msg.responseJSON) alert(msg.responseJSON["detail"]);
 	else alert("При взаимодействии с сервером произошла ошибка. Проверьте поля ввода данных");
@@ -241,11 +262,20 @@ $(document).ready(function() {
 	if ($('#scaleListTable').length) {
 		getScalelistForTable()
 	}
+	if ($('#unloadListTable').length) {
+		getUnloadlistForTable()
+	}
+	if ($('#reportsListTable').length) {
+		getReportslistForTable()
+	}
 	if ($('#labAdd_form select[name="id_te"]').length) {
 		getTElistUncheckedLab();
 	}
 	if ($('#scaleAdd_form select[name="id_te"]').length) {
 		getTElistUnweightedScale();
+	}
+	if ($('#unloadAdd_form select[name="id_te"]').length) {
+		getTElistUnloadScale();
 	}
 });
 
@@ -311,6 +341,8 @@ function getLablistForTable() {
 setInterval(getTElistForTable, 3000);
 setInterval(getLablistForTable, 3000);
 setInterval(getScalelistForTable, 3000);
+setInterval(getUnloadlistForTable, 3000);
+setInterval(getReportslistForTable, 3000);
 
 function getTElistUncheckedLab() {
 	$.ajax({
@@ -378,6 +410,72 @@ function getScalelistForTable() {
 						
 						$('#scaleListTable>tbody').append(
 							"<tr><td>" + te_id + "</td><td>" + data[i]["regnum"] + "</td><td>" + prima + "</td><td>" + secondary + "</td><td>" + user + " / " + user_final + "</td><td>" + data[i]["stat"] + "</td>"
+							+ "</tr>"
+						);
+					}
+				}
+			}
+		});
+}
+function getUnloadlistForTable() {
+	$.ajax({
+			url: 'http://' + pathToBackend + ':8000/unload-list',     
+			method: 'GET',
+			dataType: 'json',
+			data: { token : sessionStorage.getItem('token') },
+			success: function(data) {
+				if (data != undefined) {
+					$('#unloadListTable>tbody').empty();
+					for (var i = 0; i < data.length; i++) {
+						var te_id = data[i]["id_te"];						
+						$('#unloadListTable>tbody').append(
+							"<tr><td>" + te_id + "</td><td>" + data[i]["regnum"] + "</td><td>" + data[i]["vendor_item"] + "</td>"
+							+ "</tr>"
+						);
+					}
+				}
+			}
+		});
+}
+
+function getTElistUnloadScale() {
+	$.ajax({
+			url: 'http://' + pathToBackend + ':8000/te-list-ununload',     
+			method: 'GET',
+			dataType: 'json',
+			data: { token : sessionStorage.getItem('token') },
+			success: function(data) {
+				if (data != undefined) {
+					$('#unloadAdd_form select[name="id_te"]').empty();
+					
+					for (var i = 0; i < data.length; i++) {
+						var te_id = data[i]["id_te"];
+						$('#unloadAdd_form select[name="id_te"]').append(
+							"<option value = " + te_id + ">" + data[i]["regnum"] + "</option>"
+						);
+					}
+				}
+				else {
+					$('#unloadAdd_form select[name="id_te"]').append("<option value = '' selected hidden>Выберите госрегзнак ТЕ</option>");
+				}
+			}
+		});
+}
+
+function getReportslistForTable() {
+	$.ajax({
+			url: 'http://' + pathToBackend + ':8000/reports-list',     
+			method: 'GET',
+			dataType: 'json',
+			data: { token : sessionStorage.getItem('token') },
+			success: function(data) {
+				if (data != undefined) {
+					$('#reportsListTable>tbody').empty();
+					for (var i = 0; i < data.length; i++) {
+						var te_id = data[i]["id_te"];						
+						$('#reportsListTable>tbody').append(
+							"<tr><td>" + te_id + "</td><td>" + data[i]["creating_date"] + "</td><td>" + data[i]["regnum"] + "</td><td>" + data[i]["vendor_item"] + "</td>"
+							+ "<td><img src = 'info.svg' title = 'Просмотр отчёта' onclick = 'window.open(\"/act?id_te=" + te_id + "\", \"Акт приёмки\", \"height=800,width=800\")'></td>"
 							+ "</tr>"
 						);
 					}

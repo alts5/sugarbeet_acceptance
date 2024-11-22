@@ -282,3 +282,71 @@ def Scale_list(token : str):
             if elem["user_final"] is not None:
                 elem["user_final"] = mysql_query(f"SELECT fio FROM usertbl WHERE user = '{elem["user_final"]}'")[0]["fio"]
         return JSONResponse(content=result)
+
+@app.get('/unload-list')
+def unload_list(token : str):
+    user = get_user(token)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Клиент не авторизован")
+
+    result = mysql_query(f'''SELECT transport_reg_num as regnum, vendor_item FROM te
+                            WHERE primary_weighted_stat = '1' and accept_stat = '0' and reject_stat = '0' and unload_stat = '0'
+                            ORDER BY te.time DESC;
+                            ''')
+    if result is not None:
+        return JSONResponse(content=result)
+
+@app.post('/unload-add-result')
+def add_unload_result(token=Form(), id_te=Form(), place=Form(), info_unloaded=Form()):
+    user = get_user(token)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Клиент не авторизован")
+
+    if token == "" or info_unloaded == "" or place == "" or id_te == "":
+        raise HTTPException(status_code=422, detail="Не заполнены поля формы")
+
+    check_query = mysql_query(f"SELECT staff_uoid, secondary_check_stat, primary_weighted_stat FROM te WHERE id_te = '{id_te}'")[0]
+    check_dest_query = \
+    mysql_query(f"SELECT destination FROM distr_report WHERE id_te = '{id_te}' ORDER by rep_id DESC LIMIT 1")[0]
+
+    if (check_query["primary_weighted_stat"] == 1 and (check_dest_query["destination"] == "Взвешивание" or (check_dest_query[
+        "destination"] == "Взвешивание и последующий лабораторный контроль" and check_query["secondary_check_stat"] == 1))):
+        if check_query["staff_uoid"] is None:
+            mysql_query(
+                f"INSERT INTO unload_operator(info_unloaded, unload_place, user) VALUES ('{info_unloaded}','{place}','{user[0]['user']}')")
+            staff_uoid = mysql_query(f"SELECT staff_uoid FROM scale_operator ORDER by staff_uoid DESC LIMIT 1")[0][
+                "staff_uoid"]
+            mysql_query(
+                f"UPDATE te SET staff_uoid = '{staff_uoid}', unload_stat = '1' WHERE id_te = '{id_te}'")
+        else:
+            raise HTTPException(status_code=422, detail="Результаты указанного этапа для ТЕ уже внесены")
+    else:
+        raise HTTPException(status_code=422, detail="Невозможно разгрузить данную ТЕ. Не все этапы процесса пройдены/неверный этап для распределения ТЕ")
+
+@app.get('/te-list-ununload')
+def TE_list_ununload_in_scale(token : str):
+    user = get_user(token)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Клиент не авторизован")
+
+    result = mysql_query(f'''SELECT te.id_te, transport_reg_num as regnum 
+    FROM te 
+    WHERE primary_weighted_stat = '1' and accept_stat = '0' and reject_stat = '0' and unload_stat = '0'
+    ORDER BY time ASC''')
+    return JSONResponse(content=result)
+
+
+@app.get('/reports-list')
+def TE_list_reports(token : str):
+    user = get_user(token)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Клиент не авторизован")
+
+    result = mysql_query(f'''SELECT te.id_te, accepting_act.creating_date, te.transport_reg_num as regnum, vendor_item 
+    FROM te 
+    INNER JOIN accepting_act ON te.id_te = accepting_act.id_te
+    WHERE accept_stat = '1' or reject_stat = '1'
+    ORDER BY id_te DESC''')
+    for elem in result:
+        elem["creating_date"] = elem["creating_date"].strftime('%d.%m.%Y %H:%M:%S')
+    return JSONResponse(content=result)

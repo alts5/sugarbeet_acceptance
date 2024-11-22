@@ -1,0 +1,72 @@
+<html>
+<head>
+	<title>АС "Свёклопункт"</title>
+	<link rel = 'shortcut icon' href = 'favicon.png'>
+	<link rel = 'stylesheet' href = 'theme.css'>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src = './jquery-3.7.1.min.js'></script>
+	<script src = './service.js'></script>
+	<script src = './jquery.maskedinput.min.js'></script>
+</head>
+<body onload = "if (!getUser()) { sessionStorage.clear(); window.location.href = '/'; }">
+	<div class = "header">
+		<span class = "logo_header" onclick = "location.href='../workroom'">
+			<span><img src = 'favicon.png' style = "width: 40px"></span>
+			<h1>Автоматизированная система "Свёклопункт"</h1>
+		</span>
+	   
+	   <span class = "username_header"></span>
+	   <span class = "exit_header"><img src = 'power.svg' style = "width: 20px" onclick = "exitLK()"></span>
+	</div>
+	<div class = "body">
+		<div class = "nav"></div>
+		<div class = "body_header">
+			<h2>Отчётность</h2>
+			<p>В данном разделе Вы можете просматривать сформированные системой документы</p>
+		</div>	
+		<div class = "flex_div">
+			<button onclick = "modal_window_controller('reportsAddForm_window', 1)">Настроить фильтр</button>
+			<button onclick = "getreportslistForTable()">Обновить список транспортных единиц</button>
+		</div>
+		<table id = "reportsListTable">
+			<thead>
+				<tr>
+					<th>ID ТЕ</th>
+					<th>Дата формирования</th>
+					<th>Государственный рег. знак</th>
+					<th>Агрофирма</th>
+					<th>Действия</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+	
+	<div class = 'modal_wrap_lk'></div>
+	
+	<!--Окно внесения сведений о проверенной ТЕ-->
+	<div class = 'modal_window_lk' style = "height: 520px" id = "reportsAddForm_window">
+		<h3>Внесение сведений о взвешенной ТЕ</h3>
+		<form id = 'reportsAdd_form'>
+			<div>Взвешенная транспортная единица</div>
+			<select name = "id_te" placeholder = "Выберите взвешиваемую транспортную единицу" required>
+			</select>
+			<div>Этап взвешивания</div>
+			<select name = "stage" placeholder = "Выберите вид контроля" required>
+				<option value = "primary">Первичное взвешивание (вес брутто)</option>
+				<option value = "secondary">Финальное взвешивание (вес тары)</option>
+			</select>
+			<div>Значение веса в килограммах</div>
+			<input name = "result" placeholder = "Например, 8000" required value = '0' type="number">
+			<input name = "token" class = "hidden_form_field">
+		</form>
+		<div class = "modal_buttons_panel">
+			<button class = "modal_button" data-type = "confirm" onclick = "$('#reportsAdd_form').submit()">Подтвердить</button>
+			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('reportsAddForm_window', 0)">Отменить</button>
+		</div>
+	</div>
+	<script src = 'app.js'></script>
+</body>
+</html>

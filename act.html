@@ -1,0 +1,45 @@
+<html>
+<head>
+	<title>АС "Свёклопункт"</title>
+	<link rel = 'shortcut icon' href = 'favicon.png'>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src = './jquery-3.7.1.min.js'></script>
+	<script src = './service.js'></script>
+	<script src = './jquery.maskedinput.min.js'></script>
+	<style>
+		div {
+			padding: 5px 0;
+		}
+		h2, h1 {
+			text-align: center
+		}
+		table {
+			width: 100%;
+			border-collapse: collapse;			
+		}
+		table th {
+			border: 1px solid black;
+		}
+	</style>
+</head>
+<body onload = "if (!getUser()) { sessionStorage.clear(); window.location.href = '/'; }">
+	<div>
+		<h1>Акт приёмки транспортной единицы №</h1>
+		<div><b>Государственный регистрационный знак ТЕ: </b><div id = ""></div></div>
+		<div><b>Агрофирма: </b><div id = ""></div></div>
+		<div><b>Идентификатор ТЕ в информационной системе: </b><div id = ""></div></div>
+		<div><b>Время регистрации: </b><div id = ""></div></div>
+		<div><h2>Карта движения транспортной единицы на свёклопункте</h2></div>
+		<table>
+			<tr>
+				<th style = "width: 5%">№ п/п</th>
+				<th>Этап</th>
+				<th>Результат прохождения</th>
+			</tr>
+		</table>
+		<div>Заключение по результатам приёмки: <div id = ""></div></div>
+		<div><b>Ответственный оператор </b><div id = ""></div></div>
+	</div>
+</body>
+</html>

@@ -26,18 +26,15 @@
 			<p>В данном разделе Вы можете вносить сведения о разгрузке транспортных единиц</p>
 		</div>	
 		<div class = "flex_div">
-			<button onclick = "modal_window_controller('scaleAddForm_window', 1)">Внести сведения о разгруженной ТЕ</button>
-			<button onclick = "getscalelistForTable()">Обновить список транспортных единиц</button>
+			<button onclick = "modal_window_controller('unloadAddForm_window', 1)">Внести сведения о разгруженной ТЕ</button>
+			<button onclick = "getUnloadlistForTable()">Обновить список транспортных единиц</button>
 		</div>
-		<table id = "scaleListTable">
+		<table id = "unloadListTable">
 			<thead>
 				<tr>
 					<th>ID</th>
 					<th>Государственный рег. знак</th>
-					<th>Вес брутто, кг</th>
-					<th>Вес тары, кг</th>
-					<th>Операторы весов</th>
-					<th>Статус</th>
+					<th>Агрофирма</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -48,24 +45,27 @@
 	<div class = 'modal_wrap_lk'></div>
 	
 	<!--Окно внесения сведений о проверенной ТЕ-->
-	<div class = 'modal_window_lk' style = "height: 520px" id = "scaleAddForm_window">
-		<h3>Внесение сведений о взвешенной ТЕ</h3>
-		<form id = 'scaleAdd_form'>
-			<div>Взвешенная транспортная единица</div>
-			<select name = "id_te" placeholder = "Выберите взвешиваемую транспортную единицу" required>
+	<div class = 'modal_window_lk' style = "height: 520px" id = "unloadAddForm_window">
+		<h3>Внесение сведений о разгруженной ТЕ</h3>
+		<form id = 'unloadAdd_form'>
+			<div>Разгруженная транспортная единица</div>
+			<select name = "id_te" placeholder = "Выберите разгруженную транспортную единицу" required>
 			</select>
-			<div>Этап взвешивания</div>
-			<select name = "stage" placeholder = "Выберите вид контроля" required>
-				<option value = "primary">Первичное взвешивание (вес брутто)</option>
-				<option value = "secondary">Финальное взвешивание (вес тары)</option>
+			<div>Место разгрузки</div>
+			<input name = "place" placeholder = "Например, БУМ #1" required>
+			<div>Результат отгрузки</div>
+			<select name = "info_unloaded" placeholder = "Выберите вид контроля" required>
+				<option>Отгружена</option>
+				<option>Отгружена частично</option>
 			</select>
-			<div>Значение веса в килограммах</div>
-			<input name = "result" placeholder = "Например, 8000" required value = '0' type="number">
+			<input name = "token" class = "hidden_form_field">
+			<div>Комментарий</div>
+			<input name = "unload_info" placeholder = "Например, Отгружена" required value = 'Отгружена'>
 			<input name = "token" class = "hidden_form_field">
 		</form>
 		<div class = "modal_buttons_panel">
-			<button class = "modal_button" data-type = "confirm" onclick = "$('#scaleAdd_form').submit()">Подтвердить</button>
-			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('scaleAddForm_window', 0)">Отменить</button>
+			<button class = "modal_button" data-type = "confirm" onclick = "$('#unloadAdd_form').submit()">Подтвердить</button>
+			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('unloadAddForm_window', 0)">Отменить</button>
 		</div>
 	</div>
 	<script src = 'app.js'></script>
