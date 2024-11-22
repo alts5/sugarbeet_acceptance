@@ -8,6 +8,10 @@
 	<script src = './service.js'></script>
 	<script src = './jquery.maskedinput.min.js'></script>
 	<style>
+		body {
+			padding: 0;
+			margin: 0;
+		}
 		div {
 			padding: 5px 0;
 		}
@@ -18,28 +22,100 @@
 			width: 100%;
 			border-collapse: collapse;			
 		}
-		table th {
+		#stagesTable th {
 			border: 1px solid black;
+			padding: 10px;
+			background: #eee;
+		}
+		#stagesTable td {
+			border: 1px solid black;
+			padding: 10px;
+		}
+		@media print{
+			.print_btn {
+				display: none;
+			} 
+		}
+			
+		.print_btn {
+			postion: sticky; 
+			bottom: 0;
+			width: 100%; 
+			background: green; 
+			color: white; 
+			text-align: center; 
+			font-family: Arial; 
+			padding: 15px 0;
+			cursor: pointer;
+		}
+		.print_btn:active {
+			background: white; 
+			color: green; 
+			border: 1px solid green; 
 		}
 	</style>
 </head>
 <body onload = "if (!getUser()) { sessionStorage.clear(); window.location.href = '/'; }">
-	<div>
-		<h1>Акт приёмки транспортной единицы №</h1>
-		<div><b>Государственный регистрационный знак ТЕ: </b><div id = ""></div></div>
-		<div><b>Агрофирма: </b><div id = ""></div></div>
-		<div><b>Идентификатор ТЕ в информационной системе: </b><div id = ""></div></div>
-		<div><b>Время регистрации: </b><div id = ""></div></div>
-		<div><h2>Карта движения транспортной единицы на свёклопункте</h2></div>
-		<table>
+	<div style = "padding: 10px;">
+		<h1>Акт приёмки транспортной единицы № <u><span id = "rep_id"></span></u></h1>
+		<div><b>Государственный регистрационный знак ТЕ: </b><span id = "regnum"></span></div>
+		<div><b>Агрофирма: </b><span id = "vendor"></span></div>
+		<div><b>Идентификатор ТЕ в информационной системе: </b><span id = "id_te"></span></div>
+		<div><b>Дата и время регистрации ТЕ: </b><span id = "reg_datetime"></span></div>
+		<div><b>Дата и время формирования акта: </b><span id = "act_datetime"></span></div>
+		<div><h2>Карта движения транспортной единицы на свёклопункте</h2></span>
+		<table id = "stagesTable">
 			<tr>
-				<th style = "width: 5%">№ п/п</th>
-				<th>Этап</th>
-				<th>Результат прохождения</th>
+				<thead>
+					<th style = "width: 5%">№ п/п</th>
+					<th>Этап</th>
+					<th>Ответственный</th>
+					<th>Результат прохождения</th>
+				</thead>
 			</tr>
 		</table>
-		<div>Заключение по результатам приёмки: <div id = ""></div></div>
-		<div><b>Ответственный оператор </b><div id = ""></div></div>
+		<div><b>Заключение по результатам приёмки: </b><span id = "accept_info"></span></div>
+		<table style = "width: 100%;margin: 50px 0;" >
+			<tr>
+				<td style = "text-align: left"><b>Ответственный оператор </b></td>
+				<td style = "text-align: right; padding: 0 40px;" id = "operator"></td>
+			</tr>
+		</table>
+		</div>
 	</div>
+	<div onclick = "print()" class = "print_btn">Печать</div>
+	<script>
+	$(document).ready(function() {
+	let params = new URLSearchParams(window.location.search);
+	document.title = "Акт приёмки ТЕ № " + params.get('id_te');
+	$.ajax({
+			url: 'http://' + pathToBackend + ':8000/accepting-act',     
+			method: 'GET',
+			dataType: 'json',
+			data: { token : sessionStorage.getItem('token'), id_te: params.get('id_te')},
+			success: function(data) {
+				if (data != undefined) {
+					$('#rep_id').text(data[0]["rep_id"]);
+					$('#regnum').text(data[0]["regnum"]);
+					$('#vendor').text(data[0]["vendor"]);
+					$('#id_te').text(data[0]["id_te"]);
+					$('#accept_info').text(data[0]["accept_info"]);
+					$('#reg_datetime').text(data[0]["time"]);
+					$('#act_datetime').text(data[0]["creating_date"]);
+					$('#operator').text(data[0]["fio"]);
+					
+					$('#stagesTable>tbody').empty();
+					var stag = data[0]["stages"]
+					for (var i = 0; i < stag.length; i++) {						
+						$('#stagesTable>tbody').append(
+							"<tr><td>" + (i+1) + "</td><td>" + stag[i]["stage_name"] + "</td><td>" + stag[i]["staff"] + "</td><td>" + stag[i]["result"] + "</td>"
+							+ "</tr>"
+						);
+					}
+				}
+			}
+		});
+		});
+	</script>
 </body>
 </html>

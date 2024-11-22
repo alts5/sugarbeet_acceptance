@@ -483,3 +483,4 @@ function getReportslistForTable() {
 			}
 		});
 }
+

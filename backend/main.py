@@ -350,3 +350,137 @@ def TE_list_reports(token : str):
     for elem in result:
         elem["creating_date"] = elem["creating_date"].strftime('%d.%m.%Y %H:%M:%S')
     return JSONResponse(content=result)
+
+
+@app.get('/accepting-act')
+def accepting_act(token : str, id_te: int):
+    user = get_user(token)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Клиент не авторизован")
+
+    result = mysql_query(f'''SELECT rep_id, creating_date, accept_info, transport_reg_num as regnum, vendor_item as vendor, time, te.id_te, usertbl.fio
+    FROM accepting_act
+    LEFT JOIN te ON accepting_act.id_te = te.id_te 
+    LEFT JOIN operator_te ON te.id_te = operator_te.id_te 
+    LEFT JOIN operator ON operator_te.staff_id  = operator.staff_id 
+    LEFT JOIN usertbl ON operator.staff_id  = usertbl.user 
+    WHERE (accept_stat = '1' or reject_stat = '1') AND te.id_te = '{id_te}'
+    ''')
+    for elem in result:
+        elem["creating_date"] = elem["creating_date"].strftime('%d.%m.%Y %H:%M:%S')
+        elem["time"] = elem["time"].strftime('%d.%m.%Y %H:%M:%S')
+
+    result[0]["stages"] = []
+    temp = result[0]["stages"]
+    temp_dict = {}
+
+    #Сведения о регистрации
+    sql = mysql_query(f'''SELECT * FROM te 
+    INNER JOIN operator_te ON te.id_te = operator_te.id_te 
+    INNER JOIN operator ON operator_te.staff_id = operator.staff_id
+    INNER JOIN usertbl ON operator.user = usertbl.user
+    WHERE te.id_te = \'{id_te}\'
+    ''')
+    if sql is not None:
+        temp_dict["stage_name"] = "Регистрация ТЕ"
+        temp_dict["staff"] = sql[0]["fio"]
+        temp_dict["result"] = sql[0]["accepting_data"] + ". Состояние корнеплодов: " + sql[0]["sugar_beet_charact"]
+        temp.append(temp_dict)
+
+    temp_dict = {}
+
+    # Сведения о распределении
+    sql = mysql_query(f'''SELECT * FROM distr_report
+    INNER JOIN te ON distr_report.id_te = te.id_te
+    INNER JOIN operator_te ON te.id_te = operator_te.id_te 
+    INNER JOIN operator ON operator_te.staff_id = operator.staff_id
+    INNER JOIN usertbl ON operator.user = usertbl.user
+    WHERE te.id_te =  \'{id_te}\'
+        ''')
+
+    if sql is not None:
+        temp_dict["stage_name"] = "Распределение ТЕ"
+        temp_dict["staff"] = sql[0]["fio"]
+        temp_dict["result"] = sql[0]["destination"]
+        temp.append(temp_dict)
+
+    temp_dict = {}
+    # Сведения об анализе
+    sql = mysql_query(f'''SELECT * FROM laborant 
+        INNER JOIN te ON laborant.staff_lid = te.staff_lid
+        INNER JOIN usertbl ON laborant.user = usertbl.user
+        WHERE te.id_te = \'{id_te}\'
+        ''')
+    sql2 = mysql_query(f'''SELECT * FROM laborant 
+            INNER JOIN te ON laborant.staff_lid = te.staff_lid
+            INNER JOIN usertbl ON laborant.user_final = usertbl.user
+            WHERE te.id_te = \'{id_te}\'
+            ''')
+
+    if sql is not None or sql2 is not None:
+        t2 = t3 = " "
+        if sql2 is not None:
+            t2 = sql2[0]["fio"]
+            t3 = sql2[0]["secondary_checking_info"]
+        temp_dict["stage_name"] = "Лабораторный контроль ТЕ"
+        temp_dict["staff"] = sql[0]["fio"]  + " / " +  t2
+        temp_dict["result"] = sql[0]["primary_checking_info"]  + " / " + t3
+        temp.append(temp_dict)
+
+    temp_dict = {}
+    # Сведения об взвешивании
+    sql = mysql_query(f'''SELECT * FROM scale_operator 
+        INNER JOIN te ON scale_operator.staff_soid = te.staff_soid
+        INNER JOIN usertbl ON scale_operator.user = usertbl.user
+        WHERE te.id_te = \'{id_te}\'
+        ''')
+    sql2 = mysql_query(f'''SELECT * FROM scale_operator 
+            INNER JOIN te ON scale_operator.staff_soid = te.staff_soid
+            INNER JOIN usertbl ON scale_operator.user_final = usertbl.user
+            WHERE te.id_te = \'{id_te}\'
+            ''')
+
+    if sql is not None or sql2 is not None:
+        t2 = t3 = " "
+        if sql2 is not None:
+            t2 = sql2[0]["fio"]
+            t3 = sql2[0]["info_secondary_weighted"]
+        temp_dict["stage_name"] = "Взвешивание ТЕ"
+        temp_dict["staff"] = sql[0]["fio"] + " / " + t2
+        temp_dict["result"] = f"Вес брутто: {sql[0]["info_primary_weighted"]} кг. / Вес тары: {t3} кг."
+        temp.append(temp_dict)
+
+    temp_dict = {}
+    # Сведения об отгрузке
+    sql = mysql_query(f'''SELECT * FROM unloading_operator 
+            INNER JOIN te ON unloading_operator.staff_uoid = te.staff_uoid
+            INNER JOIN usertbl ON unloading_operator.user = usertbl.user
+            INNER JOIN unloading_report ON te.id_te = unloading_report.id_te
+            WHERE te.id_te = \'{id_te}\'
+            ''')
+    if sql is not None:
+        temp_dict["stage_name"] = "Разрузка ТЕ"
+        temp_dict["staff"] = sql[0]["fio"]
+        temp_dict["result"] = sql[0]["info_unloaded"] + ". Место разгрузки: " + sql[0]["unload_place"] + ". Результат: " + sql[0]["unload_info"]
+        temp.append(temp_dict)
+
+    temp_dict = {}
+    # Приёмка
+    sql = mysql_query(f'''SELECT * FROM scale_operator
+            RIGHT JOIN te ON scale_operator.staff_soid = te.staff_soid
+            INNER JOIN operator_te ON te.id_te = operator_te.id_te 
+            INNER JOIN operator ON operator_te.staff_id = operator.staff_id
+            INNER JOIN usertbl ON operator.user = usertbl.user
+            WHERE te.id_te = \'{id_te}\'
+            ''')
+    if sql is not None:
+        temp_dict["stage_name"] = "Регистрация ТЕ"
+        temp_dict["staff"] = sql[0]["fio"]
+        if sql[0]["accept_stat"] == '1':
+            wei = float(sql[0]["info_primary_weighted"]) - float(sql[0]["info_secondary_weighted"])
+            temp_dict["result"] = f"Результат: Принята. Итоговый вес: {wei} кг."
+        else:
+            temp_dict["result"] = "Результат: Отбракована"
+        temp.append(temp_dict)
+
+    return JSONResponse(content=result)
