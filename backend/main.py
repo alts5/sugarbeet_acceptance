@@ -71,7 +71,7 @@ def dashboard_indicators(token : str):
 
 
     result["totalAccept"] = mysql_query(f"SELECT COUNT(*) AS 'count' FROM te WHERE accept_stat = 1")[0]['count']
-    result["totalReject"] = mysql_query(f"SELECT COUNT(*) AS 'count' FROM te WHERE reject_stat = 1")[0]['count']
+    result["totalReject"] = mysql_query(f"SELECT get_reject_te()")[0]['get_reject_te()']
     result["totalScale"] = mysql_query(f"SELECT IFNULL(SUM(info_primary_weighted-info_secondary_weighted), 0) as summ FROM scale_operator INNER JOIN te ON scale_operator.staff_soid = te.staff_soid")[0]['summ']
     result["dayAccept"] = mysql_query(f"SELECT COUNT(*) AS 'count' FROM te WHERE accept_stat = 1 AND time BETWEEN '{date.today()} 00:00:00' AND '{date.today()} 23:59:59'")[0]['count']
     result["dayReject"] = mysql_query(f"SELECT COUNT(*) AS 'count' FROM te WHERE reject_stat = 1 AND time BETWEEN '{date.today()} 00:00:00' AND '{date.today()} 23:59:59'")[0]['count']
@@ -350,7 +350,7 @@ def TE_list_ununload_in_scale(token : str):
 
 
 @app.get('/reports-list')
-def TE_list_reports(token : str, date: str = None, regnum: str = None):
+def TE_list_reports(token : str, start: int = 0, stop: int = 0, date: str = None, regnum: str = None):
     user = get_user(token)
     if user is None:
         raise HTTPException(status_code=401, detail="Клиент не авторизован")
@@ -366,7 +366,8 @@ def TE_list_reports(token : str, date: str = None, regnum: str = None):
     FROM te 
     INNER JOIN accepting_act ON te.id_te = accepting_act.id_te
     WHERE (accept_stat = '1' or reject_stat = '1') {expression}
-    ORDER BY id_te DESC''')
+    ORDER BY id_te DESC
+    ''')
     if result is not None:
         for elem in result:
             elem["creating_date"] = elem["creating_date"].strftime('%d.%m.%Y %H:%M:%S')
@@ -526,3 +527,9 @@ def accepting_act(token : str, id_te: int):
 
     return JSONResponse(content=result)
 
+@app.get('/send-all-to-scale')
+def send_all_te_to_scale(token : str):
+    user = get_user(token)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Клиент не авторизован")
+    mysql_query("CALL send_te_reject_all()")

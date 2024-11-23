@@ -508,3 +508,16 @@ $('#filterReports_form').on('submit', function(e) {
 	modal_window_controller('filterForm_window', 0)
 	return false;
 });
+
+
+function sendAllTEToScale() {
+	$.ajax({
+			url: 'http://' + pathToBackend + ':8000/send-all-to-scale',     
+			method: 'GET',
+			dataType: 'json',
+			data: { token : sessionStorage.getItem('token') },
+			success: function(data) {
+				window.location.reload();
+			}
+		});
+}

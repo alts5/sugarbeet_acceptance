@@ -8,6 +8,7 @@
 	<script src = './jquery-3.7.1.min.js'></script>
 	<script src = './service.js'></script>
 	<script src = './jquery.maskedinput.min.js'></script>
+	<script src = './jquery.pagination.js'></script>
 </head>
 <body onload = "if (!getUser()) { sessionStorage.clear(); window.location.href = '/'; }">
 	<div class = "header">
@@ -29,7 +30,7 @@
 			<button onclick = "modal_window_controller('filterForm_window', 1)">Настроить фильтр</button>
 			<button onclick = "window.location.reload()">Обновить список транспортных единиц</button>
 		</div>
-		<table id = "reportsListTable">
+		<table id = "reportsListTable" class = "tableList">
 			<thead>
 				<tr>
 					<th>ID ТЕ</th>
@@ -43,7 +44,12 @@
 			</tbody>
 		</table>
 	</div>
-	
+	<table style = "width: 100%; text-align: center">
+		<tr>
+		<td><input id = "startF" class = "inputF"></td>
+		<td><input id = "stopF" class = "inputF"></td>
+		</tr>
+	</div>
 	<div class = 'modal_wrap_lk'></div>
 	
 	<!--Окно внесения сведений о проверенной ТЕ-->
@@ -63,6 +69,8 @@
 	</div>
 	<input id = "dateFilter" class = "hidden_form_field">
 	<input id = "regnumFilter" class = "hidden_form_field">
+	<input id = "start" class = "hidden_form_field">
+	<input id = "stop" class = "hidden_form_field">
 	<script src = 'app.js'></script>
 </body>
 </html>
