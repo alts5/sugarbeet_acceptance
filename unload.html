@@ -27,7 +27,7 @@
 		</div>	
 		<div class = "flex_div">
 			<button onclick = "modal_window_controller('unloadAddForm_window', 1)">Внести сведения о разгруженной ТЕ</button>
-			<button onclick = "getUnloadlistForTable()">Обновить список транспортных единиц</button>
+			<button onclick = "window.location.reload()">Обновить список транспортных единиц</button>
 		</div>
 		<table id = "unloadListTable">
 			<thead>
@@ -45,7 +45,7 @@
 	<div class = 'modal_wrap_lk'></div>
 	
 	<!--Окно внесения сведений о проверенной ТЕ-->
-	<div class = 'modal_window_lk' style = "height: 520px" id = "unloadAddForm_window">
+	<div class = 'modal_window_lk' style = "height: 610px" id = "unloadAddForm_window">
 		<h3>Внесение сведений о разгруженной ТЕ</h3>
 		<form id = 'unloadAdd_form'>
 			<div>Разгруженная транспортная единица</div>

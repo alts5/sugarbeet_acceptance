@@ -209,7 +209,7 @@ function exitLK() {
 }
 
 $(document).ready(function() {
-	$('.dateMask').mask('99.99.9999');
+	$('.dateMask').mask('9999-99-99');
 	var hrefs = {
 		"Дашборд" : "../workroom", 
 		"Транспортные единицы" : "../te", 
@@ -293,9 +293,13 @@ function getTElistForTable() {
 						var te_id = data[i]["id_te"];
 						var dest = data[i]["destination"] || "Ожидает распределения";
 						var warnIcon = "<td></td>";
+						var deleteIcon = "<td></td>";
 						
 						if (data[i]["result"]) {
 							warnIcon = "<td><img src = 'warn.svg' title = 'Результат исследования: " + data[i]["result"]+ "'></td>"
+						}
+						if (data[i]["new"]) {
+							deleteIcon = "<td><img src = 'bin.svg' title = 'Удалить ТЕ' onclick = removeTE('"+te_id+"')></td>"
 						}
 						
 						$('#teListTable>tbody').append(
@@ -304,6 +308,7 @@ function getTElistForTable() {
 							+ "<td><img src = 'accept.svg' title = 'Принять транспортную единицу' onclick = 'modal_window_controller(\"acceptForm_window\", 1, " +  te_id + ")'></td>"
 							+ "<td><img src = 'info.svg' title = 'Распределить транспортную единицу' onclick = 'modal_window_controller(\"distrForm_window\", 1, " +  te_id + ")'></td>"
 							+ warnIcon
+							+ deleteIcon
 							+ "</tr>"
 						);
 					}
@@ -409,7 +414,7 @@ function getScalelistForTable() {
 						var user_final = data[i]["user_final"] || "-";
 						
 						$('#scaleListTable>tbody').append(
-							"<tr><td>" + te_id + "</td><td>" + data[i]["regnum"] + "</td><td>" + prima + "</td><td>" + secondary + "</td><td>" + user + " / " + user_final + "</td><td>" + data[i]["stat"] + "</td>"
+							"<tr><td>" + te_id + "</td><td>" + data[i]["regnum"] + "</td><td>" + prima + "</td><td>" + secondary + "</td><td>" + user + " / " + user_final + "</td>"
 							+ "</tr>"
 						);
 					}
@@ -467,10 +472,11 @@ function getReportslistForTable() {
 			url: 'http://' + pathToBackend + ':8000/reports-list',     
 			method: 'GET',
 			dataType: 'json',
-			data: { token : sessionStorage.getItem('token') },
+			data: { token : sessionStorage.getItem('token'), date: $('#dateFilter').val(), regnum : $('#regnumFilter').val() },
 			success: function(data) {
+				$('#reportsListTable>tbody').empty();
+
 				if (data != undefined) {
-					$('#reportsListTable>tbody').empty();
 					for (var i = 0; i < data.length; i++) {
 						var te_id = data[i]["id_te"];						
 						$('#reportsListTable>tbody').append(
@@ -484,3 +490,21 @@ function getReportslistForTable() {
 		});
 }
 
+function removeTE(idTe) {
+	$.ajax({
+			url: 'http://' + pathToBackend + ':8000/delete-te?' + $.param({
+				token : sessionStorage.getItem('token'), id_te : idTe
+			}),     
+			method: 'DELETE',
+			success: window.location.reload()
+		});
+}
+
+$('#filterReports_form').on('submit', function(e) {
+	e.preventDefault();
+	$('#dateFilter').val($('#dateFormFil').val());
+	$('#regnumFilter').val($('#regnumFormFil').val());
+
+	modal_window_controller('filterForm_window', 0)
+	return false;
+});

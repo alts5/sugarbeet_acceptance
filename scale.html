@@ -27,7 +27,7 @@
 		</div>	
 		<div class = "flex_div">
 			<button onclick = "modal_window_controller('scaleAddForm_window', 1)">Внести сведения о взвешенной ТЕ</button>
-			<button onclick = "getscalelistForTable()">Обновить список транспортных единиц</button>
+			<button onclick = "window.location.reload()">Обновить список транспортных единиц</button>
 		</div>
 		<table id = "scaleListTable">
 			<thead>
@@ -37,7 +37,6 @@
 					<th>Вес брутто, кг</th>
 					<th>Вес тары, кг</th>
 					<th>Операторы весов</th>
-					<th>Статус</th>
 				</tr>
 			</thead>
 			<tbody>

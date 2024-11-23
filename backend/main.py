@@ -4,7 +4,7 @@ import hashlib
 import mysql.connector
 from fastapi import *
 from uuid import uuid4
-from datetime import date
+from datetime import date, datetime
 from dotenv import load_dotenv
 from starlette.responses import JSONResponse, RedirectResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -95,7 +95,8 @@ def TE_list(token : str):
     LEFT JOIN distr_report ON te.id_te = distr_report.id_te 
     LEFT JOIN laborant ON te.staff_lid = laborant.staff_lid 
     WHERE reject_stat = '0' and accept_stat = '0' 
-    and (distr_report.destination = 'Анализ показателей, вызвавших сомнение, в сырьевой лаборатории' or distr_report.destination is NULL)
+    and (distr_report.destination = 'Анализ показателей, вызвавших сомнение, в сырьевой лаборатории' or distr_report.destination is NULL or (
+    info_secondary_weighted <> 0 and unload_stat = 1))
     ORDER BY time DESC
     ''')
     if result is not None:
@@ -104,6 +105,8 @@ def TE_list(token : str):
             elem["status"] = mysql_query(f'''
             SELECT IF (scale_operator.info_secondary_weighted != 0, 'Ожидает подтверждения', 'Прибыла в свёклопункт') AS 'result'
             FROM te LEFT JOIN scale_operator ON te.staff_soid = scale_operator.staff_soid WHERE id_te = "{elem['id_te']}"''')[0]['result']
+            if mysql_query(f"SELECT id_te FROM te WHERE id_te = {elem["id_te"]} and distr_stat = '0'") is not None:
+                elem["new"] = 1
     return JSONResponse(content=result)
 
 
@@ -230,7 +233,7 @@ def TE_list_unweighted_in_scale(token : str):
 
     result = mysql_query(f'''SELECT te.id_te, transport_reg_num as regnum 
     FROM te INNER JOIN distr_report ON te.id_te = distr_report.id_te 
-    WHERE reject_stat = '0' and accept_stat = '0'
+    WHERE reject_stat = '0' and accept_stat = '0' AND info_secondary_weighted = 0
     AND (distr_report.destination = 'Взвешивание' OR distr_report.destination = 'Взвешивание и последующий лабораторный контроль') 
     ORDER BY time ASC''')
     return JSONResponse(content=result)
@@ -274,7 +277,7 @@ def Scale_list(token : str):
                             INNER JOIN scale_operator ON te.staff_soid = scale_operator.staff_soid
                             LEFT JOIN usertbl ON  usertbl.user = scale_operator.user
                             WHERE (destination = "Взвешивание" OR destination = "Взвешивание и последующий лабораторный контроль")
-                            AND reject_stat = '0' AND accept_stat = '0'
+                            AND reject_stat = '0' AND accept_stat = '0' AND info_secondary_weighted = 0
                             ORDER BY te.time DESC;
                             ''')
     if result is not None:
@@ -297,7 +300,7 @@ def unload_list(token : str):
         return JSONResponse(content=result)
 
 @app.post('/unload-add-result')
-def add_unload_result(token=Form(), id_te=Form(), place=Form(), info_unloaded=Form()):
+def add_unload_result(token=Form(), id_te=Form(), place=Form(), info_unloaded=Form(), unload_info = Form()):
     user = get_user(token)
     if user is None:
         raise HTTPException(status_code=401, detail="Клиент не авторизован")
@@ -309,15 +312,17 @@ def add_unload_result(token=Form(), id_te=Form(), place=Form(), info_unloaded=Fo
     check_dest_query = \
     mysql_query(f"SELECT destination FROM distr_report WHERE id_te = '{id_te}' ORDER by rep_id DESC LIMIT 1")[0]
 
-    if (check_query["primary_weighted_stat"] == 1 and (check_dest_query["destination"] == "Взвешивание" or (check_dest_query[
-        "destination"] == "Взвешивание и последующий лабораторный контроль" and check_query["secondary_check_stat"] == 1))):
+    if (check_query["primary_weighted_stat"] == '1' and (check_dest_query["destination"] == "Взвешивание" or (check_dest_query[
+        "destination"] == "Взвешивание и последующий лабораторный контроль" and check_query["secondary_check_stat"] == '1'))):
         if check_query["staff_uoid"] is None:
-            mysql_query(
-                f"INSERT INTO unload_operator(info_unloaded, unload_place, user) VALUES ('{info_unloaded}','{place}','{user[0]['user']}')")
-            staff_uoid = mysql_query(f"SELECT staff_uoid FROM scale_operator ORDER by staff_uoid DESC LIMIT 1")[0][
+            mysql_query(f"INSERT INTO unloading_operator(info_unloaded, unload_place, user) VALUES ('{info_unloaded}','{place}',{user[0]['user']})")
+            staff_uoid = mysql_query(f"SELECT staff_uoid FROM unloading_operator ORDER by staff_uoid DESC LIMIT 1")[0][
                 "staff_uoid"]
-            mysql_query(
-                f"UPDATE te SET staff_uoid = '{staff_uoid}', unload_stat = '1' WHERE id_te = '{id_te}'")
+
+            mysql_query(f"UPDATE te SET staff_uoid = '{staff_uoid}', unload_stat = '1' WHERE id_te = '{id_te}'")
+            mysql_query(f"INSERT INTO unloading_report(unload_info, id_te) VALUES ('{unload_info}','{id_te}')")
+
+
         else:
             raise HTTPException(status_code=422, detail="Результаты указанного этапа для ТЕ уже внесены")
     else:
@@ -337,19 +342,38 @@ def TE_list_ununload_in_scale(token : str):
 
 
 @app.get('/reports-list')
-def TE_list_reports(token : str):
+def TE_list_reports(token : str, date: str = None, regnum: str = None):
     user = get_user(token)
     if user is None:
         raise HTTPException(status_code=401, detail="Клиент не авторизован")
 
+
+    expression = ""
+    if date is not None and date != "":
+        expression += f" and creating_date BETWEEN '{date} 00:00:00' AND '{date} 23:59:59.999'"
+    if regnum is not None and regnum != "":
+        expression += f" and transport_reg_num = '{regnum}'"
+
     result = mysql_query(f'''SELECT te.id_te, accepting_act.creating_date, te.transport_reg_num as regnum, vendor_item 
     FROM te 
     INNER JOIN accepting_act ON te.id_te = accepting_act.id_te
-    WHERE accept_stat = '1' or reject_stat = '1'
+    WHERE (accept_stat = '1' or reject_stat = '1') {expression}
     ORDER BY id_te DESC''')
-    for elem in result:
-        elem["creating_date"] = elem["creating_date"].strftime('%d.%m.%Y %H:%M:%S')
+    if result is not None:
+        for elem in result:
+            elem["creating_date"] = elem["creating_date"].strftime('%d.%m.%Y %H:%M:%S')
+    print(result)
     return JSONResponse(content=result)
+
+@app.delete('/delete-te')
+def delete_te(token : str, id_te : int):
+    user = get_user(token)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Клиент не авторизован")
+
+    result = mysql_query(f'''SELECT id_te FROM te WHERE distr_stat = '0' and id_te = {id_te} ORDER BY id_te DESC''')
+    if result is not None:
+        mysql_query(f'''DELETE FROM te WHERE id_te = {id_te}''')
 
 
 @app.get('/accepting-act')
@@ -363,7 +387,7 @@ def accepting_act(token : str, id_te: int):
     LEFT JOIN te ON accepting_act.id_te = te.id_te 
     LEFT JOIN operator_te ON te.id_te = operator_te.id_te 
     LEFT JOIN operator ON operator_te.staff_id  = operator.staff_id 
-    LEFT JOIN usertbl ON operator.staff_id  = usertbl.user 
+    LEFT JOIN usertbl ON operator.user  = usertbl.user 
     WHERE (accept_stat = '1' or reject_stat = '1') AND te.id_te = '{id_te}'
     ''')
     for elem in result:
@@ -474,7 +498,7 @@ def accepting_act(token : str, id_te: int):
             WHERE te.id_te = \'{id_te}\'
             ''')
     if sql is not None:
-        temp_dict["stage_name"] = "Регистрация ТЕ"
+        temp_dict["stage_name"] = "Формирование акта приёмки ТЕ"
         temp_dict["staff"] = sql[0]["fio"]
         if sql[0]["accept_stat"] == '1':
             wei = float(sql[0]["info_primary_weighted"]) - float(sql[0]["info_secondary_weighted"])
@@ -484,3 +508,4 @@ def accepting_act(token : str, id_te: int):
         temp.append(temp_dict)
 
     return JSONResponse(content=result)
+

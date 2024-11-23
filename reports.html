@@ -26,8 +26,8 @@
 			<p>В данном разделе Вы можете просматривать сформированные системой документы</p>
 		</div>	
 		<div class = "flex_div">
-			<button onclick = "modal_window_controller('reportsAddForm_window', 1)">Настроить фильтр</button>
-			<button onclick = "getreportslistForTable()">Обновить список транспортных единиц</button>
+			<button onclick = "modal_window_controller('filterForm_window', 1)">Настроить фильтр</button>
+			<button onclick = "window.location.reload()">Обновить список транспортных единиц</button>
 		</div>
 		<table id = "reportsListTable">
 			<thead>
@@ -47,26 +47,22 @@
 	<div class = 'modal_wrap_lk'></div>
 	
 	<!--Окно внесения сведений о проверенной ТЕ-->
-	<div class = 'modal_window_lk' style = "height: 520px" id = "reportsAddForm_window">
-		<h3>Внесение сведений о взвешенной ТЕ</h3>
-		<form id = 'reportsAdd_form'>
-			<div>Взвешенная транспортная единица</div>
-			<select name = "id_te" placeholder = "Выберите взвешиваемую транспортную единицу" required>
-			</select>
-			<div>Этап взвешивания</div>
-			<select name = "stage" placeholder = "Выберите вид контроля" required>
-				<option value = "primary">Первичное взвешивание (вес брутто)</option>
-				<option value = "secondary">Финальное взвешивание (вес тары)</option>
-			</select>
-			<div>Значение веса в килограммах</div>
-			<input name = "result" placeholder = "Например, 8000" required value = '0' type="number">
+	<div class = 'modal_window_lk' style = "height: 380px" id = "filterForm_window">
+		<h3>Настройка фильтра отображения</h3>
+		<form id = 'filterReports_form'>
+			<div>Дата, за которую отображаются записи</div>
+			<input name = "date" placeholder = "Например, 22.11.2024" class = "dateMask" id = "dateFormFil">
+			<div>Государственный регистрационный знак ТЕ</div>
+			<input name = "regnum" placeholder = 'Например, А015АА116' oninput="this.value = this.value.toUpperCase()" id = "regnumFormFil">
 			<input name = "token" class = "hidden_form_field">
 		</form>
 		<div class = "modal_buttons_panel">
-			<button class = "modal_button" data-type = "confirm" onclick = "$('#reportsAdd_form').submit()">Подтвердить</button>
-			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('reportsAddForm_window', 0)">Отменить</button>
+			<button class = "modal_button" data-type = "confirm" onclick = "$('#filterReports_form').submit()">Подтвердить</button>
+			<button class = "modal_button" data-type = "cancel" onclick = "modal_window_controller('filterForm_window', 0)">Отменить</button>
 		</div>
 	</div>
+	<input id = "dateFilter" class = "hidden_form_field">
+	<input id = "regnumFilter" class = "hidden_form_field">
 	<script src = 'app.js'></script>
 </body>
 </html>
