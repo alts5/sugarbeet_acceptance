@@ -380,7 +380,12 @@ def delete_te(token : str, id_te : int):
 
     result = mysql_query(f'''SELECT id_te FROM te WHERE distr_stat = '0' and id_te = {id_te} ORDER BY id_te DESC''')
     if result is not None:
-        mysql_query(f'''DELETE FROM te WHERE id_te = {id_te}''')
+        staff_id = mysql_query(f'''SELECT operator_te.staff_id FROM operator_te 
+        INNER JOIN te ON operator_te.id_te = te.id_te
+        WHERE te.id_te = {id_te}''')
+        if staff_id is not None:
+            mysql_query(f'''DELETE FROM operator WHERE staff_id = {staff_id[0]["staff_id"]}''')
+            mysql_query(f'''DELETE FROM te WHERE id_te = {id_te}''')
 
 
 @app.get('/accepting-act')
@@ -389,12 +394,12 @@ def accepting_act(token : str, id_te: int):
     if user is None:
         raise HTTPException(status_code=401, detail="Клиент не авторизован")
 
-    result = mysql_query(f'''SELECT rep_id, creating_date, accept_info, transport_reg_num as regnum, vendor_item as vendor, time, te.id_te, usertbl.fio
+    result = mysql_query(f'''SELECT rep_id, creating_date, accept_info, fio, transport_reg_num as regnum, vendor_item as vendor, time, te.id_te
     FROM accepting_act
     LEFT JOIN te ON accepting_act.id_te = te.id_te 
     LEFT JOIN operator_te ON te.id_te = operator_te.id_te 
     LEFT JOIN operator ON operator_te.staff_id  = operator.staff_id 
-    LEFT JOIN usertbl ON operator.user  = usertbl.user 
+    LEFT JOIN usertbl ON operator.user = usertbl.user 
     WHERE (accept_stat = '1' or reject_stat = '1') AND te.id_te = '{id_te}'
     ''')
     for elem in result:
@@ -450,12 +455,14 @@ def accepting_act(token : str, id_te: int):
 
     if sql is not None or sql2 is not None:
         t2 = t3 = t4 = t5 = " "
-        if sql[0]["primary_checking_info"] is not None:
-            t4 = sql[0]["fio"]
-            t5 = sql[0]["primary_checking_info"]
-        if sql2[0]["secondary_checking_info"] is not None:
-            t2 = sql2[0]["fio"]
-            t3 = sql2[0]["secondary_checking_info"]
+        if sql is not None:
+            if sql[0]["primary_checking_info"] is not None:
+                t4 = sql[0]["fio"]
+                t5 = sql[0]["primary_checking_info"]
+        if sql2 is not None:
+            if sql2[0]["secondary_checking_info"] is not None:
+                t2 = sql2[0]["fio"]
+                t3 = sql2[0]["secondary_checking_info"]
         temp_dict["stage_name"] = "Лабораторный контроль ТЕ"
         temp_dict["staff"] = t4  + " / " +  t2
         temp_dict["result"] = t5  + " / " + t3
