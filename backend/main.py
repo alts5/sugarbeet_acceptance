@@ -144,8 +144,12 @@ def accept_te(token = Form(), accept_comment = Form(), id_te = Form()):
     if token == "" or accept_comment == "" or id_te == "":
         raise HTTPException(status_code=422, detail="Не заполнены поля формы")
 
-    mysql_query(f"UPDATE te SET accept_stat = '1' WHERE id_te = '{id_te}'")
-    mysql_query(f"INSERT INTO accepting_act(id_te,accept_info) VALUES ('{id_te}','{accept_comment}')")
+
+    if mysql_query(f"SELECT info_secondary_weighted FROM scale_operator INNER JOIN te ON scale_operator.staff_soid = te.staff_soid WHERE id_te = '{id_te}'") is not None:
+        mysql_query(f"UPDATE te SET accept_stat = '1' WHERE id_te = '{id_te}'")
+        mysql_query(f"INSERT INTO accepting_act(id_te,accept_info) VALUES ('{id_te}','{accept_comment}')")
+    else:
+        raise HTTPException(status_code=422, detail="ТЕ должна быть повторно взвешена перед принятием")
 
 @app.post('/distr-te')
 def distr_te(token = Form(), distr_place = Form(), distr_comment = Form(), id_te = Form()):
@@ -192,7 +196,10 @@ def add_lab_result(token = Form(), id_te = Form(), type_control = Form(), result
     if (check_dest_query["destination"] == "Анализ показателей, вызвавших сомнение, в сырьевой лаборатории" and type_control == "primary") or \
             (check_dest_query["destination"] == "Взвешивание и последующий лабораторный контроль" and type_control == "secondary"):
         if check_query["staff_lid"] is None:
-            mysql_query(f"INSERT INTO laborant({type_control}_checking_info, user) VALUES ('{result}','{user[0]['user']}')")
+            if type_control == "secondary":
+                mysql_query(f"INSERT INTO laborant({type_control}_checking_info, user_final) VALUES ('{result}','{user[0]['user']}')")
+            else:
+                mysql_query(f"INSERT INTO laborant({type_control}_checking_info, user) VALUES ('{result}','{user[0]['user']}')")
             staff_lid = mysql_query(f"SELECT staff_lid FROM laborant ORDER by staff_lid DESC LIMIT 1")[0]["staff_lid"]
             mysql_query(f"UPDATE te SET staff_lid = '{staff_lid}', {type_control}_check_stat = '1' WHERE id_te = '{id_te}'")
         elif check_query[f"secondary_check_stat"] == '0':
@@ -233,7 +240,8 @@ def TE_list_unweighted_in_scale(token : str):
 
     result = mysql_query(f'''SELECT te.id_te, transport_reg_num as regnum 
     FROM te INNER JOIN distr_report ON te.id_te = distr_report.id_te 
-    WHERE reject_stat = '0' and accept_stat = '0' AND info_secondary_weighted = 0
+    LEFT JOIN scale_operator ON te.staff_soid = scale_operator.staff_soid 
+    WHERE reject_stat = '0' and accept_stat = '0' and ((info_secondary_weighted = '0' and primary_weighted_stat = '1') or primary_weighted_stat = '0')
     AND (distr_report.destination = 'Взвешивание' OR distr_report.destination = 'Взвешивание и последующий лабораторный контроль') 
     ORDER BY time ASC''')
     return JSONResponse(content=result)
@@ -248,7 +256,7 @@ def add_scale_result(token = Form(), id_te = Form(), stage = Form(), result = Fo
     if token == "" or stage == "" or float(result) <= 0 or id_te == "":
         raise HTTPException(status_code=422, detail="Не заполнены поля формы")
 
-    check_query = mysql_query(f"SELECT staff_soid, primary_weighted_stat FROM te WHERE id_te = '{id_te}'")[0]
+    check_query = mysql_query(f"SELECT staff_soid, primary_weighted_stat, unload_stat FROM te WHERE id_te = '{id_te}'")[0]
     check_dest_query = mysql_query(f"SELECT destination FROM distr_report WHERE id_te = '{id_te}' ORDER by rep_id DESC LIMIT 1")[0]
     check_scale_query = mysql_query(f"SELECT info_primary_weighted as fst, info_secondary_weighted as snd FROM scale_operator INNER JOIN te ON scale_operator.staff_soid = te.staff_soid WHERE te.id_te = '{id_te}'")
 
@@ -257,12 +265,12 @@ def add_scale_result(token = Form(), id_te = Form(), stage = Form(), result = Fo
             mysql_query(f"INSERT INTO scale_operator(info_{stage}_weighted, user) VALUES ({float(result)},'{user[0]['user']}')")
             staff_soid = mysql_query(f"SELECT staff_soid FROM scale_operator ORDER by staff_soid DESC LIMIT 1")[0]["staff_soid"]
             mysql_query(f"UPDATE te SET staff_soid = '{staff_soid}', primary_weighted_stat = '1' WHERE id_te = '{id_te}'")
-        elif check_query[f"primary_weighted_stat"] == '1' and stage == "secondary" and check_scale_query[0]["snd"] == 0 and float(result) > 0 and \
+        elif check_query[f"primary_weighted_stat"] == '1' and check_query[f"unload_stat"] == '1' and stage == "secondary" and check_scale_query[0]["snd"] == 0 and float(result) > 0 and \
                 check_scale_query[0]["fst"] > check_scale_query[0]["snd"] :
             staff_soid = mysql_query(f"SELECT staff_soid FROM te WHERE id_te = '{id_te}'")[0]["staff_soid"]
             mysql_query(f"UPDATE `scale_operator` SET info_secondary_weighted = {float(result)}, user_final = {user[0]["user"]}  WHERE staff_soid = '{staff_soid}'")
         else:
-            raise HTTPException(status_code=422, detail="Результаты указанного этапа для ТЕ уже внесены")
+            raise HTTPException(status_code=422, detail="Результаты указанного этапа для ТЕ уже внесены или не произведена операция разгрузки")
     else:
         raise HTTPException(status_code=422, detail="Неверный этап для распределения ТЕ")
 
@@ -292,7 +300,7 @@ def unload_list(token : str):
     if user is None:
         raise HTTPException(status_code=401, detail="Клиент не авторизован")
 
-    result = mysql_query(f'''SELECT transport_reg_num as regnum, vendor_item FROM te
+    result = mysql_query(f'''SELECT te.id_te, transport_reg_num as regnum, vendor_item FROM te
                             WHERE primary_weighted_stat = '1' and accept_stat = '0' and reject_stat = '0' and unload_stat = '0'
                             ORDER BY te.time DESC;
                             ''')
@@ -362,7 +370,6 @@ def TE_list_reports(token : str, date: str = None, regnum: str = None):
     if result is not None:
         for elem in result:
             elem["creating_date"] = elem["creating_date"].strftime('%d.%m.%Y %H:%M:%S')
-    print(result)
     return JSONResponse(content=result)
 
 @app.delete('/delete-te')
@@ -442,13 +449,16 @@ def accepting_act(token : str, id_te: int):
             ''')
 
     if sql is not None or sql2 is not None:
-        t2 = t3 = " "
-        if sql2 is not None:
+        t2 = t3 = t4 = t5 = " "
+        if sql[0]["primary_checking_info"] is not None:
+            t4 = sql[0]["fio"]
+            t5 = sql[0]["primary_checking_info"]
+        if sql2[0]["secondary_checking_info"] is not None:
             t2 = sql2[0]["fio"]
             t3 = sql2[0]["secondary_checking_info"]
         temp_dict["stage_name"] = "Лабораторный контроль ТЕ"
-        temp_dict["staff"] = sql[0]["fio"]  + " / " +  t2
-        temp_dict["result"] = sql[0]["primary_checking_info"]  + " / " + t3
+        temp_dict["staff"] = t4  + " / " +  t2
+        temp_dict["result"] = t5  + " / " + t3
         temp.append(temp_dict)
 
     temp_dict = {}
