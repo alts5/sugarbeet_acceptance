@@ -26,3 +26,12 @@
 
 ![img_7.png](img_7.png)
 
+Для развёртывания интерфейса АРМ оператора потребуется web-сервер Nginx или Apache, для развёртывания серверной части необходим Python не ниже версии 3.10 (лучше 3.12). Исходный код серверной части и файл для установки зависимостей находятся в папке backend.
+Примёр развёртывания серверной части (Linux):
+```
+cd backend
+python3 -m venv venv
+source venv\bin\activate
+pip3 install -r requirements.txt
+uvicorn main:app
+```
