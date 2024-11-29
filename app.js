@@ -492,7 +492,7 @@ $('#filterReports_form').on('submit', function(e) {
 	e.preventDefault();
 	$('#dateFilter').val($('#dateFormFil').val());
 	$('#regnumFilter').val($('#regnumFormFil').val());
-
+	getReportslistForTable();
 	modal_window_controller('filterForm_window', 0)
 	return false;
 });
@@ -514,37 +514,64 @@ var test = [];
 
 function populateTable(test) {
 
+    if (test != undefined) {
+        const chunkArrayWithReduce = (array, size) =>
+        array.reduce((chunks, item, index) =>
+        index % size === 0 ? [...chunks, array.slice(index, index + size)] : chunks, []);
 
-    const chunkArrayWithReduce = (array, size) =>
-    array.reduce((chunks, item, index) =>
-    index % size === 0 ? [...chunks, array.slice(index, index + size)] : chunks, []);
+        data = chunkArrayWithReduce(test, 10);
 
-    data = chunkArrayWithReduce(test, 10);
+        $('#reportsListTable>tbody').empty();
 
-    $('#reportsListTable>tbody').empty();
-    if (data != undefined) {
         totalPages = data.length;
 
         createTable();
         createButtons();
 
     }
-}
-
-function createButtons() {
-    $('#paggin').empty();
-    n = $('#currentPage').val();
-    for (var i = 0; i < data.length; i++) {
-        var color = "";
-        if (i == n) color = "background: #4c4c4c";
-        $('#paggin').append('<button onclick = \"changePosition(' + (i+1) + ')\" style = \"' + color + '\">' + (i + 1) + '</button>');
+    else {
+        $('#reportsListTable>tbody').empty();
+        $('#paggin').empty();
+        data = [];
     }
 }
 
-function changePosition(pos) {
-    $('#currentPage').val(pos - 1);
+var offset = 0;
+
+function createButtons() {
+    $('#paggin').empty();
+    n = Number($('#currentPage').val());
+
+    if (data.length < 5) k = data.length;
+    else {
+        if (offset > 0) $('#paggin').append('<button onclick = \"changePosition(1)\" > < </button>');
+        k = 4;
+    }
+    var i = 0;
+
+    console.log(offset)
+    for (i = 4 * offset; i < k + 4 * offset; i++) {
+        if (data[i] != undefined) {
+            var color = "";
+            if (i == n) color = "background: #4c4c4c; color: white";
+            $('#paggin').append('<button onclick = \"changePosition(0, ' + (i+1) + ')\" style = \"' + color + '\">' + (i + 1) + '</button>');
+        }
+    }
+
+    if (data[i] != undefined && k == 4) $('#paggin').append('<button onclick = \"changePosition(2)\" > > </button>');
+
+}
+
+function changePosition(direction, pos=-5) {
+    if (direction == 1 && offset > 0) offset -= 1;
+    if (direction == 2 && data.length % 4 > offset) offset += 1;
+
+    if (pos != -5) {
+        $('#currentPage').val(pos - 1);
+    }
     createButtons();
     createTable();
+
 }
 
 function createTable() {

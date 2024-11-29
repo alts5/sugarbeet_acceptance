@@ -194,7 +194,7 @@ a:visited {
 .flex_div {
 	display: flex;
 	justify-content: center;
-	padding: 10px;
+	padding: 10px 0;
 	gap: 10px;
 	flex-wrap: wrap;
 	margin: 10px 0;
