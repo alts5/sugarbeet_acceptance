@@ -368,9 +368,11 @@ def TE_list_reports(token : str, start: int = 0, stop: int = 0, date: str = None
     WHERE (accept_stat = '1' or reject_stat = '1') {expression}
     ORDER BY id_te DESC
     ''')
+
     if result is not None:
         for elem in result:
             elem["creating_date"] = elem["creating_date"].strftime('%d.%m.%Y %H:%M:%S')
+            elem["totalCount"] = len(result)
     return JSONResponse(content=result)
 
 @app.delete('/delete-te')

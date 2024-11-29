@@ -8,7 +8,6 @@
 	<script src = './jquery-3.7.1.min.js'></script>
 	<script src = './service.js'></script>
 	<script src = './jquery.maskedinput.min.js'></script>
-	<script src = './jquery.pagination.js'></script>
 </head>
 <body onload = "if (!getUser()) { sessionStorage.clear(); window.location.href = '/'; }">
 	<div class = "header">
@@ -44,11 +43,7 @@
 			</tbody>
 		</table>
 	</div>
-	<table style = "width: 100%; text-align: center">
-		<tr>
-		<td><input id = "startF" class = "inputF"></td>
-		<td><input id = "stopF" class = "inputF"></td>
-		</tr>
+	<div class = "flex_div" id = "paggin" >
 	</div>
 	<div class = 'modal_wrap_lk'></div>
 	
@@ -69,8 +64,8 @@
 	</div>
 	<input id = "dateFilter" class = "hidden_form_field">
 	<input id = "regnumFilter" class = "hidden_form_field">
-	<input id = "start" class = "hidden_form_field">
-	<input id = "stop" class = "hidden_form_field">
+	<input id = "totalRows" class = "hidden_form_field">
+	<input id = "currentPage" class = "hidden_form_field" value = '0' type = 'number'>
 	<script src = 'app.js'></script>
 </body>
 </html>

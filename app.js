@@ -347,7 +347,6 @@ setInterval(getTElistForTable, 3000);
 setInterval(getLablistForTable, 3000);
 setInterval(getScalelistForTable, 3000);
 setInterval(getUnloadlistForTable, 3000);
-setInterval(getReportslistForTable, 3000);
 
 function getTElistUncheckedLab() {
 	$.ajax({
@@ -474,18 +473,7 @@ function getReportslistForTable() {
 			dataType: 'json',
 			data: { token : sessionStorage.getItem('token'), date: $('#dateFilter').val(), regnum : $('#regnumFilter').val() },
 			success: function(data) {
-				$('#reportsListTable>tbody').empty();
-
-				if (data != undefined) {
-					for (var i = 0; i < data.length; i++) {
-						var te_id = data[i]["id_te"];						
-						$('#reportsListTable>tbody').append(
-							"<tr><td>" + te_id + "</td><td>" + data[i]["creating_date"] + "</td><td>" + data[i]["regnum"] + "</td><td>" + data[i]["vendor_item"] + "</td>"
-							+ "<td><img src = 'info.svg' title = 'Просмотр отчёта' onclick = 'window.open(\"/act?id_te=" + te_id + "\", \"Акт приёмки\", \"height=800,width=800\")'></td>"
-							+ "</tr>"
-						);
-					}
-				}
+                populateTable(data);
 			}
 		});
 }
@@ -521,3 +509,54 @@ function sendAllTEToScale() {
 			}
 		});
 }
+
+var test = [];
+
+function populateTable(test) {
+
+
+    const chunkArrayWithReduce = (array, size) =>
+    array.reduce((chunks, item, index) =>
+    index % size === 0 ? [...chunks, array.slice(index, index + size)] : chunks, []);
+
+    data = chunkArrayWithReduce(test, 10);
+
+    $('#reportsListTable>tbody').empty();
+    if (data != undefined) {
+        totalPages = data.length;
+
+        createTable();
+        createButtons();
+
+    }
+}
+
+function createButtons() {
+    $('#paggin').empty();
+    n = $('#currentPage').val();
+    for (var i = 0; i < data.length; i++) {
+        var color = "";
+        if (i == n) color = "background: #4c4c4c";
+        $('#paggin').append('<button onclick = \"changePosition(' + (i+1) + ')\" style = \"' + color + '\">' + (i + 1) + '</button>');
+    }
+}
+
+function changePosition(pos) {
+    $('#currentPage').val(pos - 1);
+    createButtons();
+    createTable();
+}
+
+function createTable() {
+    $('#reportsListTable>tbody').empty();
+    n = $('#currentPage').val();
+    for (var i = 0; i < data[n].length; i++) {
+        var te_id = data[n][i]["id_te"];
+        $('#reportsListTable>tbody').append(
+            "<tr><td>" + te_id + "</td><td>" + data[n][i]["creating_date"] + "</td><td>" + data[n][i]["regnum"] + "</td><td>" + data[n][i]["vendor_item"] + "</td>"
+            + "<td><img src = 'info.svg' title = 'Просмотр отчёта' onclick = 'window.open(\"/act?id_te=" + te_id + "\", \"Акт приёмки\", \"height=800,width=800\")'></td>"
+            + "</tr>"
+        );
+    }
+}
+
